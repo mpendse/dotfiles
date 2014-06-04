@@ -1,0 +1,367 @@
+" Global options. 
+
+" Nocompatible
+set nocompatible
+
+" Line numbers
+set rnu nu
+
+" Autoindent
+set ai smartindent
+
+" Ruler
+set ruler
+
+" Case insensitive search
+set ignorecase smartcase
+
+" Highlight search terms
+set incsearch hlsearch
+
+" Backspace behavior
+set backspace=indent,eol,start
+
+" Filetype and syntax specific settings
+filetype plugin on
+syntax on
+
+" 4 column tabs
+set ts=4
+set sw=4
+set expandtab
+
+" Folding
+set fdm=syntax
+set foldlevelstart=1
+
+" Language specific folds
+au FileType python set fdm=indent
+
+" Keep status line always
+set laststatus=2
+
+" Omnicomplete
+set omnifunc=syntaxcomplete#Complete
+
+" Persistent window and fold state.
+" au BufWinLeave *.* silent! mkview
+" au BufWinEnter *.* silent! loadview
+
+" Getting to arbitrary positions FTW!
+set mouse=a
+
+" Working with buffers
+" Allow changing buffer without saving it first
+set hidden
+
+" Have 2 lines of context always above and below the cursor
+set scrolloff=5
+
+" Better tab completion in the command line
+set wildmode=longest,list,full
+set wildmenu
+
+" No menu/tool bar in gvim
+set guioptions-=m
+set guioptions-=T
+
+" Check for local tag file first and then in parent directory then check till /
+set tags=tags,./tags;/
+
+"""" PLUGINS
+
+if has('vim_starting')
+    set runtimepath+=~/.vim/bundle/neobundle.vim/
+endif
+
+call neobundle#rc(expand('~/.vim/bundle/'))
+
+" Let NeoBundle manage NeoBundle
+NeoBundleFetch 'Shougo/neobundle.vim'
+
+" Bundles
+NeoBundle 'Valloric/YouCompleteMe'
+NeoBundle 'tpope/vim-commentary'
+NeoBundle 'bling/vim-airline'
+NeoBundle 'vim-scripts/pythoncomplete'
+NeoBundle 'flazz/vim-colorschemes'
+NeoBundle 'ervandew/supertab'
+NeoBundle 'scrooloose/nerdtree'
+NeoBundle 'altercation/vim-colors-solarized'
+NeoBundle 'tpope/vim-fugitive'
+NeoBundle 'justinmk/vim-sneak'
+NeoBundle 'wellle/targets.vim'
+NeoBundle 'Shougo/vimproc', {
+      \ 'build' : {
+      \     'windows' : 'make -f make_mingw32.mak',
+      \     'cygwin' : 'make -f make_cygwin.mak',
+      \     'mac' : 'make -f make_mac.mak',
+      \     'unix' : 'make -f make_unix.mak',
+      \    },
+      \ }
+NeoBundle 'Shougo/neomru.vim'
+NeoBundle 'Shougo/unite.vim'
+NeoBundle 'terryma/vim-smooth-scroll'
+NeoBundle 'tpope/vim-abolish'
+NeoBundle 'tpope/vim-dispatch'
+NeoBundle 'gregsexton/gitv'
+NeoBundle 'octol/vim-cpp-enhanced-highlight'
+NeoBundle 'tpope/vim-surround'
+NeoBundle 'tsukkee/unite-tag'
+NeoBundle 'Shougo/unite-outline'
+" NeoBundle 'Shougo/neocomplcache.vim'
+" NeoBundle 'Valloric/YouCompleteMe'
+" NeoBundle 'kien/ctrlp.vim'
+" NeoBundle 'LaTeX-Box-Team/LaTeX-Box'
+" NeoBundle 'vim-scripts/AutoComplPop'
+
+" Required for NeoBundle
+filetype plugin indent on
+
+"""" PLUGIN SETTINGS
+
+" Neocomplcache settings
+" let g:neocomplcache_enable_at_startup = 1
+" let g:neocomplcache_enable_smart_case = 1
+
+autocmd FileType python set omnifunc=pythoncomplete#Complete
+
+" Supertab settings
+let g:SuperTabDefaultCompletionType = "<c-n>"
+
+" disable smoothscroll in diff mode (it is slow as it is)
+if !&diff
+    " smoothscroll mappings
+    nnoremap <silent> <c-u> :call smooth_scroll#up(&scroll, 5, 2)<CR>
+    nnoremap <silent> <c-d> :call smooth_scroll#down(&scroll, 5, 2)<CR>
+    nnoremap <silent> <c-b> :call smooth_scroll#up(&scroll*2, 5, 4)<CR>
+    nnoremap <silent> <c-f> :call smooth_scroll#down(&scroll*2, 5, 4)<CR>
+endif
+
+" Override for latex filetype. (used with LaTex-Box plugin)
+" let g:tex_flavor='latex'
+
+" Airline settings
+let g:airline_theme='dark'
+"
+" Ignore trailing whitespaces, but pay attention to mixed indents
+let g:airline#extensions#whitespace#checks = [ 'indent' ]
+
+" Removing separators
+let g:airline_left_sep=''
+let g:airline_right_sep=''
+"
+" Enable the list of buffers
+let g:airline#extensions#tabline#enabled = 1
+
+" Show buffer numbers
+let g:airline#extensions#tabline#buffer_nr_show = 1
+
+" Unite settings
+" Use fuzzy matcher for everything
+call unite#filters#matcher_default#use(['matcher_fuzzy'])
+
+" Yank history enable
+let g:unite_source_history_yank_enable = 1
+
+" File search
+nnoremap <Leader>f :<C-u>Unite -start-insert -buffer-name=files file directory file_rec/async:!<CR>
+
+" Buffer and mru search
+nnoremap <Leader>r :<C-u>Unite -start-insert -buffer-name=buffers buffer file_mru <CR>
+
+" Grep from cwd
+nnoremap <Leader>g :<C-u>Unite -start-insert -buffer-name=grep grep:.<CR>
+
+" Yank history
+nnoremap <Leader>h :<C-u>Unite -start-insert -buffer-name=yanks history/yank<CR>
+
+" Tags
+nnoremap <Leader>t :<C-u>Unite -start-insert -buffer-name=tags tag<CR>
+
+" Outline
+nnoremap <Leader>o :<C-u>Unite -buffer-name=outline -vertical outline<CR>
+
+" Set up some custom ignores
+call unite#custom_source('file_rec,file_rec/async,file_mru,file,buffer,grep',
+      \ 'ignore_pattern', join([
+      \ '\.git/',
+      \ 'tmp/',
+      \ '.pyc',
+      \ '.swp',
+      \ ], '\|'))
+
+" Custom mappings for the unite buffer
+autocmd FileType unite call s:unite_settings()
+function! s:unite_settings()
+    " Play nice with supertab
+    let b:SuperTabDisabled=1
+    " Enable navigation with control-j and control-k in insert mode
+    imap <buffer> <C-j>   <Plug>(unite_select_next_line)
+    imap <buffer> <C-k>   <Plug>(unite_select_previous_line)
+endfunction
+
+" YouCompleteMe settings
+let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
+let g:ycm_autoclose_preview_window_after_completion = 1
+let g:ycm_show_diagnostics_ui = 1
+let g:ycm_enable_diagnostic_signs = 1
+nnoremap <Leader>jd :YcmCompleter GoTo<CR>
+
+"""" MAPPINGS
+
+" Copy Paste from system clipboard
+vnoremap <Leader>y "+y
+nnoremap <Leader>y "+y
+vnoremap <Leader>Y "+Y
+nnoremap <Leader>Y "+Y
+vnoremap <Leader>d "+d
+nnoremap <Leader>d "+d
+nnoremap <Leader>p "+p
+nnoremap <Leader>P "+P
+vnoremap <Leader>p "+p
+vnoremap <Leader>P "+P
+
+" H: Go to beginning of line.
+noremap H ^
+
+" Move up/down display lines instead of actual lines
+nnoremap j gj
+nnoremap k gk
+
+" Quit all, useful in vimdiff
+nnoremap <Leader>q :qa<CR>
+
+" Working with buffers
+if has("gui_running")
+    nnoremap <C-Tab> :bnext<CR>
+    nnoremap <C-S-Tab> :bprevious<CR>
+else
+    nnoremap gt :bnext<CR>
+    nnoremap gT :bprevious<CR>
+endif
+nnoremap <Leader>d :bp<CR>:bd#<CR>
+
+" Jumping to buffer
+nnoremap <Leader>b :buffers<CR>:buffer 
+
+" IntelligentQuit, :Q works for closing 
+" windows and buffers both
+:command! -bang Q :call g:IntelligentQuit(<bang>0)
+
+" Switching between hybrid numbering and absolute numbering mode
+autocmd WinEnter,FocusGained * set relativenumber number
+autocmd WinLeave,FocusLost * set relativenumber!
+autocmd InsertEnter * set relativenumber!
+autocmd InsertLeave * set relativenumber number
+
+" Keep text centered when searching
+" and open fold if hit is inside fold
+nnoremap n nzzzv
+nnoremap N Nzzzv
+
+" Disable ex mode key
+nnoremap Q <nop>
+
+" Disable command history
+nnoremap q: <nop>
+
+" Replay macro for each line of a visual selection
+xnoremap @q :normal @q<CR>
+
+" Repeat last command for each line of a visual selection
+xnoremap . :normal .<CR>
+
+" Map [[ to [{ for cpp files because it is easier to move to parent block
+autocmd FileType cpp,c nnoremap [[ [{
+autocmd FileType cpp,c nnoremap ]] ]}
+
+" Make
+nnoremap <F9> :call g:BuildOrRun()<CR>
+
+" Navigating quickfix list
+nnoremap ]q :cnext<CR>
+nnoremap [q :cprevious<CR>
+
+"""" FUNCTIONS
+
+function! g:ToggleNuMode()
+  if(&relativenumber == 1)
+    set relativenumber!
+  else
+    set relativenumber
+  endif
+endfunc
+
+noremap <C-l> :call g:ToggleNuMode()<CR>
+
+function! g:IntelligentQuit(ignore_changes)
+    " Closes the window if more than one window, deletes a buffer if
+    " more than one buffer. Else calls :q
+    let num_bufs = len(filter(range(1, bufnr('$')), 'buflisted(v:val)')) 
+    let window_count = winnr('$')
+    if( window_count > 1)
+        :hide
+        return
+    endif
+    if( num_bufs == 1 )
+        if(a:ignore_changes == 1)
+            :q!
+        else
+            :q
+        endif
+    elseif( num_bufs == 2 )
+        " Handle preview windows
+        if(a:ignore_changes == 1)
+            :bd!
+        else
+            :bd
+        endif
+    else
+        if(a:ignore_changes == 1)
+            :bp | bd! #
+        else
+            :bp | bd #
+        endif
+    endif
+endfunc
+
+function! g:BuildOrRun()
+    " Runs make on c++ files and runs if 
+    " python script
+    let curr_filetype = &filetype
+    if(curr_filetype ==? "python")
+        :!./%
+    elseif(curr_filetype ==? "cpp")
+        let wd = getcwd()
+        let split_cwd = split(wd, '/')
+        if split_cwd[-1] ==? "src"
+            :make -j10 -C ../build/gcc-debug
+        elseif split_cwd[-1] ==? "harness"
+            :make -j10 -C ../../build/gcc-debug
+        else
+            " try default make
+            :make
+        endif
+    endif
+endfunction
+    
+
+"""" COLORSCHEMES
+
+" 256 terminal colours
+set t_Co=256
+
+" Colorschemes
+" colo zenburn
+" colo 256-grayvim
+" colo random
+" colo anotherdark
+" set bg=dark
+" let g:solarized_termcolors=256
+" colo solarized
+colo zenburn
+
+" Stupid fucking foldcolumn gets sets to two somehow
+" Put at the end for that reason
+set fdc=0

@@ -1,0 +1,37 @@
+# Personal bash aliases
+alias cdrepo='cd /sandbox/mihir.pendse/repos'
+alias cd2='cd ../..'
+alias cd3='cd ../../..'
+alias tmux='tmux -2'
+alias :q=quit_vim_style
+alias ack='ack-grep'
+alias soap='source activate py3k'
+alias sod='source deactivate'
+alias rm='rm -I'
+alias gvims='gvim --servername GVIM'
+alias gvimr='gvim --remote'
+alias retag='ctags -R --exclude=build --exclude=.git --exclude=log --exclude=.swp *'
+
+# vi mode
+set -o vi
+
+# Append to history
+shopt -s histappend
+# History ignores
+HISTIGNORE='ls:bg:fg:history:ls:ll:cd:pwd:git'
+
+# git and coloured prompt
+source ~/.git-prompt.sh
+source ~/.bash-prompt.sh
+
+quit_vim_style () 
+{
+    while true; do
+        read -p "Not in Vim; Still quit (y/n)? " yn
+        case $yn in
+            [Yy]* ) exit;;
+            [Nn]* ) break;;
+            * ) break;;
+        esac
+    done
+}
