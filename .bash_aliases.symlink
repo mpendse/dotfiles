@@ -2,6 +2,7 @@
 alias cdrepo='cd /sandbox/mihir.pendse/repos'
 alias cd2='cd ../..'
 alias cd3='cd ../../..'
+alias lsd='ls -d */'
 alias tmux='tmux -2'
 alias :q=quit_vim_style
 alias ack='ack-grep'

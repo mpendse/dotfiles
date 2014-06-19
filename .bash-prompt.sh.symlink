@@ -89,7 +89,15 @@ __short_pwd()
     echo ${MYPATH}
 }
 
-export PS1='\u:$(\
+__print_hostname()
+{
+    if [ $HOSTNAME != "off-dev-l006" ]; then
+        # Color is high intensity blue
+        echo -ne "\033[94m@"$HOSTNAME"\033[0m"
+    fi
+}
+
+export PS1='\u$(__print_hostname):$(\
 if [ $(__git_ps1)x != "x" ]; then \
   echo "'$BYellow"$(__short_pwd)"'$(echo `git status` | egrep "nothing( added)* to commit" > /dev/null 2>&1; \
   if [ "$?" -eq "0" ]; then \

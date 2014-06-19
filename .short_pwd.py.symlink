@@ -5,7 +5,7 @@ import os
 try:
     path = str(sys.argv[1])
 except:
-    print "Error"
+    print("Error")
     sys.exit()
 
 try:
