@@ -4,10 +4,10 @@
 # appended to them. Handles symlinked files, directories and symlinked 
 # files inside non symlinked directories.
 
+# TODO handle existing targets. (backup? overwrite?)
 # TODO handle symlinked files inside symlinked directories. Right now, it
 # does nothing for files that are under a symlinked directory. (Can you even
 # symlink under a symlink?)
-# TODO handle existing targets. (backup? overwrite?)
 
 import sys, os
 from argparse import ArgumentParser

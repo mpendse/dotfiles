@@ -109,6 +109,9 @@ NeoBundle 'octol/vim-cpp-enhanced-highlight'
 NeoBundle 'tpope/vim-surround'
 NeoBundle 'tsukkee/unite-tag'
 NeoBundle 'Shougo/unite-outline'
+NeoBundle 'sjl/gundo.vim'
+" NeoBundle 'SirVer/ultisnips'
+" NeoBundle 'honza/vim-snippets'
 " NeoBundle 'Shougo/neocomplcache.vim'
 " NeoBundle 'Valloric/YouCompleteMe'
 " NeoBundle 'kien/ctrlp.vim'
@@ -208,6 +211,9 @@ let g:ycm_show_diagnostics_ui = 1
 let g:ycm_enable_diagnostic_signs = 1
 nnoremap <Leader>jd :YcmCompleter GoTo<CR>
 
+" Gundo
+nnoremap <Leader>u :GundoToggle<CR>
+
 """" MAPPINGS
 
 " Copy Paste from system clipboard
@@ -283,6 +289,15 @@ nnoremap <F9> :call g:BuildOrRun()<CR>
 nnoremap ]q :cnext<CR>
 nnoremap [q :cprevious<CR>
 
+" Trying an escape mapping
+inoremap jj <Esc>
+
+" Moving around splits
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+
 """" FUNCTIONS
 
 function! g:ToggleNuMode()
@@ -293,7 +308,8 @@ function! g:ToggleNuMode()
   endif
 endfunc
 
-noremap <C-l> :call g:ToggleNuMode()<CR>
+" TODO conflicts with split movement
+" noremap <C-l> :call g:ToggleNuMode()<CR>
 
 function! g:IntelligentQuit(ignore_changes)
     " Closes the window if more than one window, deletes a buffer if
