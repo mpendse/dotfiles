@@ -3,12 +3,9 @@ import sys
 import os
 
 try:
-    path = os.getcwd()
-except OSError as e:
-    print(os.strerror(e.errno))
-    sys.exit()
+    path = str(sys.argv[1])
 except:
-    print("Error")
+    print "Error"
     sys.exit()
 
 try:
@@ -18,11 +15,9 @@ except:
 else:
     path = path.replace(homedir, '~', 1)
 
-
-# Always needs to be called with one argument, the max length. 
-# Else does not shorten the path.
+# Does not shorten path if max length argument is not provided
 try:
-    length = int(sys.argv[1])
+    length = int(sys.argv[2])
 except:
     print(path)
     sys.exit()

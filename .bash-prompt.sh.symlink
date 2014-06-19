@@ -85,7 +85,7 @@ Jobs="\j"
 
 __short_pwd()
 {
-    export MYPATH='$(~/.short_pwd.py 40)'
+    export MYPATH='$(~/.short_pwd.py '$PathFull' 40)'
     echo ${MYPATH}
 }
 
