@@ -110,6 +110,7 @@ NeoBundle 'tpope/vim-surround'
 NeoBundle 'tsukkee/unite-tag'
 NeoBundle 'Shougo/unite-outline'
 NeoBundle 'sjl/gundo.vim'
+NeoBundle 'tpope/vim-obsession'
 " NeoBundle 'SirVer/ultisnips'
 " NeoBundle 'honza/vim-snippets'
 " NeoBundle 'Shougo/neocomplcache.vim'
@@ -298,6 +299,25 @@ nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
 
+" Search for selected text, forwards or backwards.
+vnoremap <silent> * :<C-U>
+  \let old_reg=getreg('"')<Bar>let old_regtype=getregtype('"')<CR>
+  \gvy/<C-R><C-R>=substitute(
+  \escape(@", '/\.*$^~['), '\_s\+', '\\_s\\+', 'g')<CR><CR>
+  \gV:call setreg('"', old_reg, old_regtype)<CR>
+vnoremap <silent> # :<C-U>
+  \let old_reg=getreg('"')<Bar>let old_regtype=getregtype('"')<CR>
+  \gvy?<C-R><C-R>=substitute(
+  \escape(@", '?\.*$^~['), '\_s\+', '\\_s\\+', 'g')<CR><CR>
+  \gV:call setreg('"', old_reg, old_regtype)<CR>
+
+" Abbreviation only works if it is a ':' command and 'q'(or wq) is in the first
+" column. q calls the Q command, which calls IntelligentQuit().
+" Also works with q! (it expands to Q!), and doesn't work with qa (doesn't
+" expand to Qa). wq works as expected.
+cnoreabbrev q <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'Q' : 'q')<CR>
+cnoreabbrev wq <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'w\|Q' : 'wq')<CR>
+
 """" FUNCTIONS
 
 function! g:ToggleNuMode()
@@ -326,18 +346,11 @@ function! g:IntelligentQuit(ignore_changes)
         else
             :q
         endif
-    elseif( num_bufs == 2 )
-        " Handle preview windows
+    else
         if(a:ignore_changes == 1)
             :bd!
         else
             :bd
-        endif
-    else
-        if(a:ignore_changes == 1)
-            :bp | bd! #
-        else
-            :bp | bd #
         endif
     endif
 endfunc
