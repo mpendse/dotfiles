@@ -35,7 +35,10 @@ set fdm=syntax
 set foldlevelstart=1
 
 " Language specific folds
-au FileType python set fdm=indent
+augroup python_fold
+    autocmd!
+    au FileType python set fdm=indent
+augroup END
 
 " Keep status line always
 set laststatus=2
@@ -54,7 +57,7 @@ set mouse=a
 " Allow changing buffer without saving it first
 set hidden
 
-" Have 2 lines of context always above and below the cursor
+" Have 5 lines of context always above and below the cursor
 set scrolloff=5
 
 " Better tab completion in the command line
@@ -104,13 +107,13 @@ NeoBundle 'Shougo/unite.vim'
 NeoBundle 'terryma/vim-smooth-scroll'
 NeoBundle 'tpope/vim-abolish'
 NeoBundle 'tpope/vim-dispatch'
-NeoBundle 'gregsexton/gitv'
 NeoBundle 'octol/vim-cpp-enhanced-highlight'
 NeoBundle 'tpope/vim-surround'
 NeoBundle 'tsukkee/unite-tag'
 NeoBundle 'Shougo/unite-outline'
 NeoBundle 'sjl/gundo.vim'
 NeoBundle 'tpope/vim-obsession'
+" NeoBundle 'gregsexton/gitv'
 " NeoBundle 'SirVer/ultisnips'
 " NeoBundle 'honza/vim-snippets'
 " NeoBundle 'Shougo/neocomplcache.vim'
@@ -128,7 +131,10 @@ filetype plugin indent on
 " let g:neocomplcache_enable_at_startup = 1
 " let g:neocomplcache_enable_smart_case = 1
 
-autocmd FileType python set omnifunc=pythoncomplete#Complete
+augroup python_complete
+    autocmd!
+    autocmd FileType python set omnifunc=pythoncomplete#Complete
+augroup END
 
 " Supertab settings
 let g:SuperTabDefaultCompletionType = "<c-n>"
@@ -196,7 +202,10 @@ call unite#custom_source('file_rec,file_rec/async,file_mru,file,buffer,grep',
       \ ], '\|'))
 
 " Custom mappings for the unite buffer
-autocmd FileType unite call s:unite_settings()
+augroup unite
+    autocmd!
+    autocmd FileType unite call s:unite_settings()
+augroup END
 function! s:unite_settings()
     " Play nice with supertab
     let b:SuperTabDisabled=1
@@ -208,8 +217,10 @@ endfunction
 " YouCompleteMe settings
 let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
 let g:ycm_autoclose_preview_window_after_completion = 1
-let g:ycm_show_diagnostics_ui = 1
-let g:ycm_enable_diagnostic_signs = 1
+" Turning this off because I got bored of the lag (don't know whether turning it
+" off will help, though)
+let g:ycm_show_diagnostics_ui = 0
+" let g:ycm_enable_diagnostic_signs = 1
 nnoremap <Leader>jd :YcmCompleter GoTo<CR>
 
 " Gundo
@@ -247,7 +258,6 @@ else
     nnoremap gt :bnext<CR>
     nnoremap gT :bprevious<CR>
 endif
-nnoremap <Leader>d :bp<CR>:bd#<CR>
 
 " Jumping to buffer
 nnoremap <Leader>b :buffers<CR>:buffer 
@@ -257,10 +267,13 @@ nnoremap <Leader>b :buffers<CR>:buffer
 :command! -bang Q :call g:IntelligentQuit(<bang>0)
 
 " Switching between hybrid numbering and absolute numbering mode
-autocmd WinEnter,FocusGained * set relativenumber number
-autocmd WinLeave,FocusLost * set relativenumber!
-autocmd InsertEnter * set relativenumber!
-autocmd InsertLeave * set relativenumber number
+augroup numbering
+    autocmd!
+    autocmd WinEnter,FocusGained * set relativenumber number
+    autocmd WinLeave,FocusLost * set relativenumber!
+    autocmd InsertEnter * set relativenumber!
+    autocmd InsertLeave * set relativenumber number
+augroup END
 
 " Keep text centered when searching
 " and open fold if hit is inside fold
@@ -280,8 +293,11 @@ xnoremap @q :normal @q<CR>
 xnoremap . :normal .<CR>
 
 " Map [[ to [{ for cpp files because it is easier to move to parent block
-autocmd FileType cpp,c nnoremap [[ [{
-autocmd FileType cpp,c nnoremap ]] ]}
+augroup cpp_parent_block
+    autocmd!
+    autocmd FileType cpp,c nnoremap [[ [{
+    autocmd FileType cpp,c nnoremap ]] ]}
+augroup END
 
 " Make
 nnoremap <F9> :call g:BuildOrRun()<CR>

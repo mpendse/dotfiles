@@ -85,19 +85,23 @@ Jobs="\j"
 
 __short_pwd()
 {
-    export MYPATH='$(~/.short_pwd.py '$PathFull' 40)'
+    export MYPATH='$(~/.short_pwd.py "$PWD" 40)'
     echo ${MYPATH}
 }
 
-__print_hostname()
+__jobs_count()
 {
-    if [ $HOSTNAME != "off-dev-l006" ]; then
-        # Color is high intensity blue
-        echo -ne "\033[94m@"$HOSTNAME"\033[0m"
+    job_count=$(jobs -s | wc -l)
+    if [ $job_count -ne 0 ]; then
+        printf "[%s] " $job_count
     fi
 }
 
-export PS1='\u$(__print_hostname):$(\
+export PS1=''$Red'$(__jobs_count)'$Color_Off'\
+\u'$IBlue'$(\
+if [ $HOSTNAME != "off-dev-l006" ]; then \
+    printf "@$HOSTNAME"; \
+fi)'$Color_Off':$(\
 if [ $(__git_ps1)x != "x" ]; then \
   echo "'$BYellow"$(__short_pwd)"'$(echo `git status` | egrep "nothing( added)* to commit" > /dev/null 2>&1; \
   if [ "$?" -eq "0" ]; then \
