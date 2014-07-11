@@ -388,14 +388,17 @@ client.add_signal("focus", function(c) c.border_color = beautiful.border_focus e
 client.add_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
 -- }}}
 
-do
-  local cmds =
-  {
-    "xfsettingsd"
-  }
+-- Define startup applications.
+-- xfsettingsd is here presumably so the fonts/appearance can be set using xfce4-settings-manager
+-- And presumably it is useless because I'm using awesome under gnome.
+-- do
+--   local cmds =
+--   {
+--     "xfsettingsd"
+--   }
 
-  for _,i in pairs(cmds) do
-    awful.util.spawn(i)
-  end
-end
+--   for _,i in pairs(cmds) do
+--     awful.util.spawn(i)
+--   end
+-- end
 --

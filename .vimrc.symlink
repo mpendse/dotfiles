@@ -116,7 +116,7 @@ NeoBundle 'tpope/vim-obsession'
 " NeoBundle 'gregsexton/gitv'
 " NeoBundle 'SirVer/ultisnips'
 " NeoBundle 'honza/vim-snippets'
-" NeoBundle 'Shougo/neocomplcache.vim'
+" NeoBundle 'Shougo/neocomplete.vim'   " Requires Vim 7.3.885+ and Lua enabled.
 " NeoBundle 'Valloric/YouCompleteMe'
 " NeoBundle 'kien/ctrlp.vim'
 " NeoBundle 'LaTeX-Box-Team/LaTeX-Box'
@@ -127,9 +127,9 @@ filetype plugin indent on
 
 """" PLUGIN SETTINGS
 
-" Neocomplcache settings
-" let g:neocomplcache_enable_at_startup = 1
-" let g:neocomplcache_enable_smart_case = 1
+" Neocomplete settings
+" let g:neocomplete#enable_at_startup = 1
+" let g:neocomplete#enable_smart_case = 1
 
 augroup python_complete
     autocmd!
@@ -215,7 +215,7 @@ function! s:unite_settings()
 endfunction
 
 " YouCompleteMe settings
-let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
+let g:ycm_confirm_extra_conf = 0
 let g:ycm_autoclose_preview_window_after_completion = 1
 " Turning this off because I got bored of the lag (don't know whether turning it
 " off will help, though)
@@ -306,7 +306,6 @@ nnoremap <F9> :call g:BuildOrRun()<CR>
 nnoremap ]q :cnext<CR>
 nnoremap [q :cprevious<CR>
 
-" Trying an escape mapping
 inoremap jj <Esc>
 
 " Moving around splits
@@ -398,14 +397,14 @@ endfunction
 set t_Co=256
 
 " Colorschemes
-" colo zenburn
 " colo 256-grayvim
 " colo random
 " colo anotherdark
 " set bg=dark
 " let g:solarized_termcolors=256
 " colo solarized
-colo zenburn
+" colo zenburn
+colo wombat
 
 " Stupid fucking foldcolumn gets sets to two somehow
 " Put at the end for that reason

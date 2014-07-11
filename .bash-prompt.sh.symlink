@@ -97,11 +97,15 @@ __jobs_count()
     fi
 }
 
+__hostname()
+{
+    if [ $HOSTNAME != "off-dev-l006" ]; then
+        printf "@$HOSTNAME";
+    fi
+}
+
 export PS1=''$Red'$(__jobs_count)'$Color_Off'\
-\u'$IBlue'$(\
-if [ $HOSTNAME != "off-dev-l006" ]; then \
-    printf "@$HOSTNAME"; \
-fi)'$Color_Off':$(\
+\u'$IBlue'$(__hostname)'$Color_Off':$(\
 if [ $(__git_ps1)x != "x" ]; then \
   echo "'$BYellow"$(__short_pwd)"'$(echo `git status` | egrep "nothing( added)* to commit" > /dev/null 2>&1; \
   if [ "$?" -eq "0" ]; then \
