@@ -113,6 +113,7 @@ NeoBundle 'tsukkee/unite-tag'
 NeoBundle 'Shougo/unite-outline'
 NeoBundle 'sjl/gundo.vim'
 NeoBundle 'tpope/vim-obsession'
+NeoBundle 'tpope/vim-eunuch'
 " NeoBundle 'gregsexton/gitv'
 " NeoBundle 'SirVer/ultisnips'
 " NeoBundle 'honza/vim-snippets'
@@ -404,7 +405,7 @@ set t_Co=256
 " let g:solarized_termcolors=256
 " colo solarized
 " colo zenburn
-colo wombat
+colo wombat256
 
 " Stupid fucking foldcolumn gets sets to two somehow
 " Put at the end for that reason
