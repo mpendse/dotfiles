@@ -3,33 +3,33 @@
 # http://mediadoneright.com/content/ultimate-git-ps1-bash-prompt
 
 # Regular Colors
-Black=$(tput setaf 0)        # Black
-Red=$(tput setaf 1)          # Red
-Green=$(tput setaf 2)        # Green
-Yellow=$(tput setaf 3)       # Yellow
-Blue=$(tput setaf 4)         # Blue
-Magenta=$(tput setaf 5)       # Purple
-Cyan=$(tput setaf 6)         # Cyan
-White=$(tput setaf 7)        # White
+BLACK=$(tput setaf 0)        # Black
+RED=$(tput setaf 1)          # Red
+GREEN=$(tput setaf 2)        # Green
+YELLOW=$(tput setaf 3)       # Yellow
+BLUE=$(tput setaf 4)         # Blue
+MAGENTA=$(tput setaf 5)       # Purple
+CYAN=$(tput setaf 6)         # Cyan
+WHITE=$(tput setaf 7)        # White
 
 # Bold
-Bold=$(tput bold)
+BOLD=$(tput bold)
 
 # Underline
-Underline=$(tput smul)
+UNDERLINE=$(tput smul)
 
 # All attributes off (Reset)
-Normal=$(tput sgr0)
+NORMAL=$(tput sgr0)
 
 # Background
-BBlack=$(tput setab 0)        # Black
-BRed=$(tput setab 1)          # Red
-BGreen=$(tput setab 2)        # Green
-BYellow=$(tput setab 3)       # Yellow
-BBlue=$(tput setab 4)         # Blue
-BMagenta=$(tput setab 5)       # Purple
-BCyan=$(tput setab 6)         # Cyan
-BWhite=$(tput setab 7)        # White
+BBLACK=$(tput setab 0)        # Black
+BRED=$(tput setab 1)          # Red
+BGREEN=$(tput setab 2)        # Green
+BYELLOW=$(tput setab 3)       # Yellow
+BBLUE=$(tput setab 4)         # Blue
+BMAGENTA=$(tput setab 5)       # Purple
+BCYAN=$(tput setab 6)         # Cyan
+BWHITE=$(tput setab 7)        # White
 
 
 
@@ -70,29 +70,23 @@ __newline()
     fi
 }
 
-__part_of_git_repo()
-{
-    echo `git status` | egrep "nothing( added)* to commit" > /dev/null 2>&1;
-    if [ "$?" -eq "0" ]; then
-    # No changes to working tree
-        printf "%b" "${Green} $(__git_ps1 "(%s)")";
-    else
-    # Changes to working tree
-        printf "%b" "${Red} $(__git_ps1 "{%s}")";
-    fi
-}
-
-__git_or_not()
-{
-    if [ $(__git_ps1)x != "x" ]; then
-    # Working directory is part of a git repo
-      printf "%b" "${Bold}${Yellow}$(__short_pwd)$(__part_of_git_repo)${Normal} ";
-    else
-      # Not in git repo
-      printf "%b" "${Yellow}$(__short_pwd)${Normal} ";
-    fi
-}
-
-# TODO Line wrapping problem
-export PS1='\[${Red}\]\[$(__jobs_count)\]\[${Normal}\]\
-\u\[${Blue}\]\[$(__hostname)\]\[${Normal}\]:\[$(__git_or_not)\]$(__newline)\$ '
+export PS1='\[${RED}\]$(__jobs_count)\[${NORMAL}\]\
+\u\[${BLUE}\]$(__hostname)\[${NORMAL}\]:\
+$(
+if [ $(__git_ps1)x != "x" ]; then
+	# Working directory is part of a git repo
+	printf "\[${BOLD}\]\[${YELLOW}\]$(__short_pwd)$(
+	echo `git status` | egrep "nothing( added)* to commit" > /dev/null 2>&1;
+	if [ "$?" -eq "0" ]; then
+		# No changes to working tree
+		printf "\[${GREEN}\] $(__git_ps1 "(%s)")";
+	else
+		# Changes to working tree
+		printf "\[${RED}\] $(__git_ps1 "{%s}")";
+	fi
+	)\[${NORMAL}\] ";
+else
+	# Not in git repo
+	printf "\[${YELLOW}\]$(__short_pwd)\[${NORMAL}\] ";
+fi
+)$(__newline)\$ '
