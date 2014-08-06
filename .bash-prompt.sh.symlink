@@ -1,6 +1,4 @@
 #  Customize BASH PS1 prompt to show current GIT repository and branch.
-# Adapted from Mike Steward's script at 
-# http://mediadoneright.com/content/ultimate-git-ps1-bash-prompt
 
 # Regular Colors
 BLACK=$(tput setaf 0)        # Black
@@ -30,8 +28,6 @@ BBLUE=$(tput setab 4)         # Blue
 BMAGENTA=$(tput setab 5)       # Purple
 BCYAN=$(tput setab 6)         # Cyan
 BWHITE=$(tput setab 7)        # White
-
-
 
 # Various variables you might want for your PS1 prompt instead
 Time12h="\T"
@@ -65,7 +61,7 @@ __hostname()
 __newline()
 {
     cols=$(tput cols)
-    if [ $cols -le 60 ]; then
+    if [ $cols -lt 80 ]; then
         printf ' \n '
     fi
 }

@@ -1,0 +1,15 @@
+[alias]
+	st = status
+	last = log -1 HEAD
+	ch = checkout
+	br = branch
+	di = difftool
+	lg = log --graph --color --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+[diff]
+	tool = vimdiff
+[core]
+	editor = vim
+[color]
+	ui = auto
+[include]
+	path = .gitconfig.local

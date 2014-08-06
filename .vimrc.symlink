@@ -1,10 +1,10 @@
-" Global options. 
+"""" BASIC OPTIONS 
 
 " Nocompatible
 set nocompatible
 
 " Line numbers
-set rnu nu
+set nu
 
 " Autoindent
 set ai smartindent
@@ -46,10 +46,6 @@ set laststatus=2
 " Omnicomplete
 set omnifunc=syntaxcomplete#Complete
 
-" Persistent window and fold state.
-" au BufWinLeave *.* silent! mkview
-" au BufWinEnter *.* silent! loadview
-
 " Getting to arbitrary positions FTW!
 set mouse=a
 
@@ -64,12 +60,17 @@ set scrolloff=5
 set wildmode=longest,list,full
 set wildmenu
 
-" No menu/tool bar in gvim
-set guioptions-=m
-set guioptions-=T
+if has('gui_running')
+    " No menu/tool bar in gvim
+    set guioptions-=m
+    set guioptions-=T
+endif
 
 " Check for local tag file first and then in parent directory then check till /
 set tags=tags,./tags;/
+
+" Don't clobber the unnamed register when pasting over text in visual mode. 
+vnoremap p pgvy
 
 """" PLUGINS
 
@@ -83,7 +84,11 @@ call neobundle#rc(expand('~/.vim/bundle/'))
 NeoBundleFetch 'Shougo/neobundle.vim'
 
 " Bundles
-NeoBundle 'Valloric/YouCompleteMe'
+if v:version >= 704
+    NeoBundle 'Valloric/YouCompleteMe'
+else
+    NeoBundle 'Shougo/neocomplcache.vim'
+endif
 NeoBundle 'tpope/vim-commentary'
 NeoBundle 'bling/vim-airline'
 NeoBundle 'vim-scripts/pythoncomplete'
@@ -128,9 +133,15 @@ filetype plugin indent on
 
 """" PLUGIN SETTINGS
 
-" Neocomplete settings
+" Neocomplete settings " Requires Vim 7.3.885+ and Lua enabled.
 " let g:neocomplete#enable_at_startup = 1
 " let g:neocomplete#enable_smart_case = 1
+
+if v:version < 704 
+    " NeoComplCache settings
+    let g:neocomplcache_enable_at_startup = 1
+    let g:neocomplcache_enable_smart_case = 1
+endif
 
 augroup python_complete
     autocmd!
@@ -215,17 +226,38 @@ function! s:unite_settings()
     imap <buffer> <C-k>   <Plug>(unite_select_previous_line)
 endfunction
 
-" YouCompleteMe settings
-let g:ycm_confirm_extra_conf = 0
-let g:ycm_autoclose_preview_window_after_completion = 1
-" Turning this off because I got bored of the lag (don't know whether turning it
-" off will help, though)
-let g:ycm_show_diagnostics_ui = 0
-" let g:ycm_enable_diagnostic_signs = 1
-nnoremap <Leader>jd :YcmCompleter GoTo<CR>
+if v:version >= 704 
+    " YouCompleteMe settings
+    let g:ycm_confirm_extra_conf = 0
+    let g:ycm_autoclose_preview_window_after_completion = 1
+    " Turning this off because I got bored of the lag 
+    let g:ycm_show_diagnostics_ui = 0
+    " let g:ycm_enable_diagnostic_signs = 1
+    nnoremap <Leader>jd :YcmCompleter GoTo<CR>
+endif
 
 " Gundo
 nnoremap <Leader>u :GundoToggle<CR>
+
+" Trying some sneak settings
+" Hijacking f and t to call sneak
+nmap f <Plug>Sneak_f
+nmap F <Plug>Sneak_F
+xmap f <Plug>Sneak_f
+xmap F <Plug>Sneak_F
+" Not doing the operator pending modes (omap) because it messes with
+" repeat operation after doing something like ct/newtext<Esc>
+
+nmap t <Plug>Sneak_t
+nmap T <Plug>Sneak_T
+xmap t <Plug>Sneak_t
+xmap T <Plug>Sneak_T
+
+" Clever S mode
+let g:sneak#s_next = 1
+
+" Case determined by ignorecase / smartcase
+let g:sneak#use_ic_scs = 1
 
 """" MAPPINGS
 
@@ -241,12 +273,13 @@ nnoremap <Leader>P "+P
 vnoremap <Leader>p "+p
 vnoremap <Leader>P "+P
 
-" H: Go to beginning of line.
-noremap H ^
-
 " Move up/down display lines instead of actual lines
 nnoremap j gj
 nnoremap k gk
+
+" Move up/down actual lines whenever necessary
+nnoremap gj j
+nnoremap gk k
 
 " Quit all, useful in vimdiff
 nnoremap <Leader>q :qa<CR>
@@ -265,16 +298,7 @@ nnoremap <Leader>b :buffers<CR>:buffer
 
 " IntelligentQuit, :Q works for closing 
 " windows and buffers both
-:command! -bang Q :call g:IntelligentQuit(<bang>0)
-
-" Switching between hybrid numbering and absolute numbering mode
-augroup numbering
-    autocmd!
-    autocmd WinEnter,FocusGained * set relativenumber number
-    autocmd WinLeave,FocusLost * set relativenumber!
-    autocmd InsertEnter * set relativenumber!
-    autocmd InsertLeave * set relativenumber number
-augroup END
+command! -bang Q :call g:IntelligentQuit(<bang>0)
 
 " Keep text centered when searching
 " and open fold if hit is inside fold
@@ -301,7 +325,7 @@ augroup cpp_parent_block
 augroup END
 
 " Make
-nnoremap <F9> :call g:BuildOrRun()<CR>
+nnoremap <F9> :call g:BuildOrRun("/build/gcc-debug")<CR>
 
 " Navigating quickfix list
 nnoremap ]q :cnext<CR>
@@ -333,6 +357,69 @@ vnoremap <silent> # :<C-U>
 " expand to Qa). wq works as expected.
 cnoreabbrev q <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'Q' : 'q')<CR>
 cnoreabbrev wq <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'w\|Q' : 'wq')<CR>
+
+" Switch to .h file if on .cpp file, or vice versa
+nnoremap <Leader>a :call g:AlternateSourceFile()<CR>
+
+" Standardized the behaviour of D
+nnoremap D d$
+
+" H: Go to beginning of line.
+noremap H ^
+
+" L: Go to end of line
+noremap L g_
+
+" Clear search
+nnoremap <Leader><Space> :noh<CR>
+
+" Don't open manual
+nnoremap K <nop>
+
+" Center curzor on opening all folds
+nnoremap zR zRzz
+
+" Trying out a insert blank line above or below mapping.
+" the mark prevents from losing cursor position and
+" the set paste mode temporarily turns off auto indent, so a 
+" comment character isn't entered if the mapping is triggered 
+" from within a comment.
+nnoremap <silent>[<Space> :set paste<CR>m`O<Esc>``:set nopaste<CR>
+nnoremap <silent>]<Space> :set paste<CR>m`o<Esc>``:set nopaste<CR>
+
+""" AUTOCOMMANDS
+" (that don't fit into any above categories)
+
+if v:version >= 704 
+    " Switching between hybrid numbering and absolute numbering mode
+    augroup numbering
+        autocmd!
+        autocmd WinEnter,FocusGained * set relativenumber number
+        autocmd WinLeave,FocusLost * set relativenumber!
+        autocmd InsertEnter * set relativenumber!
+        autocmd InsertLeave * set relativenumber number
+    augroup END
+endif
+
+" Cursorline only in normal mode and when window is focused.
+augroup cursorline
+    au BufWinEnter,FocusGained,WinEnter,InsertLeave * set cul
+    au FocusLost,WinLeave,InsertEnter * set nocul
+augroup END
+
+" Remembers my folds when switching between buffers. Keeps only one view
+" per file. This shouldn't be necessary, but apparently there is some plugin
+" which folds everything I had unfolded before I left a buffer (because this
+" doesn't happen with vim -u NONE) and I'm too lazy to track down 
+" which plugin is responsible.
+" TODO Figure out a way to delete the created view file
+" TODO Doesn't work always
+augroup please_keep_my_fold_state
+    autocmd!
+    set viewoptions="folds,cursor"
+    autocmd BufWinLeave * if expand("%") != "" | mkview! | endif
+    autocmd BufWinEnter * if expand("%") != "" | loadview | endif
+augroup END
 
 """" FUNCTIONS
 
@@ -371,26 +458,79 @@ function! g:IntelligentQuit(ignore_changes)
     endif
 endfunc
 
-function! g:BuildOrRun()
-    " Runs make on c++ files and runs if 
-    " python script
+function! g:BuildOrRun(buildsubdir)
+    " Runs make on c++ files in the passed subdirectory (inside toplevel project
+    " dir) and runs from same dir if python script
     let curr_filetype = &filetype
     if(curr_filetype ==? "python")
         :!./%
     elseif(curr_filetype ==? "cpp")
-        let wd = getcwd()
-        let split_cwd = split(wd, '/')
-        if split_cwd[-1] ==? "src"
-            :make -j10 -C ../build/gcc-debug
-        elseif split_cwd[-1] ==? "harness"
-            :make -j10 -C ../../build/gcc-debug
-        else
-            " try default make
-            :make
-        endif
+        let toplevelpath = FindTopLevelProjectDir()
+        let builddir = toplevelpath . a:buildsubdir
+        :execute 'make -j21 -C ' . builddir
     endif
 endfunction
-    
+
+function! g:AlternateSourceFile()
+    " If on a .cpp file, switches to its .h file, or vice versa.
+    if(expand('%:p:t:e') ==? "cpp")
+        :find %:p:t:r.h
+    elseif(expand('%:p:t:e') ==? "h")
+        :find %:p:t:r.cpp
+    endif
+endfunction
+
+" Highlight Word 
+"
+" This mini-plugin provides a few mappings for highlighting words temporarily.
+" n is a number from 1-6 to highlight the current word in a specific color.
+" Taken from Steve Losh's vimrc.
+" TODO haven't figured out a convenient way to invoke this yet. 
+" keymapping or command?
+" Bigger TODO Does not highlight -__-
+
+function! HiInterestingWord(n)
+    " Save our location.
+    normal! mz
+
+    " Yank the current word into the z register.
+    normal! "zyiw
+
+    " Calculate an arbitrary match ID.  Hopefully nothing else is using it.
+    let mid = 86750 + a:n
+
+    " Clear existing matches, but don't worry if they don't exist.
+    silent! call matchdelete(mid)
+
+    " Construct a literal pattern that has to match at boundaries.
+    let pat = '\V\<' . escape(@z, '\') . '\>'
+
+    " Actually match the words.
+    call matchadd("InterestingWord" . a:n, pat, 1, mid)
+
+    " Move back to our original location.
+    normal! `z
+endfunction 
+
+" Highlight groups used by above function
+hi def InterestingWord1 guifg=#000000 ctermfg=16 guibg=#ffa724 ctermbg=214
+hi def InterestingWord2 guifg=#000000 ctermfg=16 guibg=#aeee00 ctermbg=154
+hi def InterestingWord3 guifg=#000000 ctermfg=16 guibg=#8cffba ctermbg=121
+hi def InterestingWord4 guifg=#000000 ctermfg=16 guibg=#b88853 ctermbg=137
+hi def InterestingWord5 guifg=#000000 ctermfg=16 guibg=#ff9eb8 ctermbg=211
+hi def InterestingWord6 guifg=#000000 ctermfg=16 guibg=#ff2c4b ctermbg=195
+
+function! FindTopLevelProjectDir()
+    " Searches for a .git directory upward till root.
+    let isittopdir = finddir('.git') 
+    if isittopdir ==? ".git"
+        return getcwd()
+    endif
+    let gitdir = finddir('.git', ';')
+    let gitdirsplit = split(gitdir, '/')
+    let toplevelpath = '/' . join(gitdirsplit[:-2],'/')
+    return toplevelpath
+endfunction
 
 """" COLORSCHEMES
 
@@ -401,12 +541,51 @@ set t_Co=256
 " colo 256-grayvim
 " colo random
 " colo anotherdark
-" set bg=dark
-" let g:solarized_termcolors=256
-" colo solarized
+set bg=dark
+let g:solarized_termcolors=256
+colo solarized
+" let g:zenburn_high_Contrast = 1
 " colo zenburn
-colo wombat256
+" colo wombat256
 
 " Stupid fucking foldcolumn gets sets to two somehow
 " Put at the end for that reason
 set fdc=0
+
+if filereadable(glob("~/.vimrc.local"))
+    source ~/.vimrc.local
+endif
+
+" Project specific settings
+if filereadable(".vimrc.project")
+    source .vimrc.project
+endif
+
+"""" TRYING STUFF FROM SENSIBLE.VIM
+
+if &listchars ==# 'eol:$'
+    set listchars=tab:>\ ,trail:-,extends:>,precedes:<,nbsp:+
+endif
+
+if &history < 1000
+    set history=1000
+endif
+if &tabpagemax < 50
+    set tabpagemax=50
+endif
+if !empty(&viminfo)
+    set viminfo^=!
+endif
+set sessionoptions-=options
+
+" Load matchit.vim, but only if the user hasn't installed a newer version.
+if !exists('g:loaded_matchit') && findfile('plugin/matchit.vim', &rtp) ==# ''
+    runtime! macros/matchit.vim
+endif
+
+inoremap <C-U> <C-G>u<C-U>
+
+if &encoding ==# 'latin1' && has('gui_running')
+    set encoding=utf-8
+endif
+

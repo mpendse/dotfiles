@@ -23,20 +23,13 @@ def get_args():
 
 def make_links(symlinks, int_dirs):
     if len(int_dirs) != 0:
-        print "Found intermediate directories:"
         for dir in int_dirs:
-            print 'Create', dir, '(y/n)?'
-            ch = raw_input()
-            if ch=='y':
-                try:
-                    os.makedirs(dir)
-                except Exception as err:
-                    print 'Couldn\'t create directory', dir, ';', err
-                    continue
-                print 'Created', dir
-            else:
-                print 'Directory not created.'
+            try:
+                os.makedirs(dir)
+            except Exception as err:
+                print 'Couldn\'t create directory', dir, ';', err
                 continue
+            print 'Created', dir
 
     print "Found", len(symlinks), "links to create; create all (y/n)?"
     ch = raw_input()
