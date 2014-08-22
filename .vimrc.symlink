@@ -30,15 +30,16 @@ set ts=4
 set sw=4
 set expandtab
 
+" Fed up of folding
 " Folding
-set fdm=syntax
-set foldlevelstart=1
+" set fdm=syntax
+" set foldlevelstart=1
 
 " Language specific folds
-augroup python_fold
-    autocmd!
-    au FileType python set fdm=indent
-augroup END
+" augroup python_fold
+"     autocmd!
+"     au FileType python set fdm=indent
+" augroup END
 
 " Keep status line always
 set laststatus=2
@@ -119,11 +120,11 @@ NeoBundle 'Shougo/unite-outline'
 NeoBundle 'sjl/gundo.vim'
 NeoBundle 'tpope/vim-obsession'
 NeoBundle 'tpope/vim-eunuch'
+NeoBundle 'tpope/vim-repeat'
 " NeoBundle 'gregsexton/gitv'
 " NeoBundle 'SirVer/ultisnips'
 " NeoBundle 'honza/vim-snippets'
 " NeoBundle 'Shougo/neocomplete.vim'   " Requires Vim 7.3.885+ and Lua enabled.
-" NeoBundle 'Valloric/YouCompleteMe'
 " NeoBundle 'kien/ctrlp.vim'
 " NeoBundle 'LaTeX-Box-Team/LaTeX-Box'
 " NeoBundle 'vim-scripts/AutoComplPop'
@@ -193,16 +194,16 @@ nnoremap <Leader>f :<C-u>Unite -start-insert -buffer-name=files file directory f
 nnoremap <Leader>r :<C-u>Unite -start-insert -buffer-name=buffers buffer file_mru <CR>
 
 " Grep from cwd
-nnoremap <Leader>g :<C-u>Unite -start-insert -buffer-name=grep grep:.<CR>
+nnoremap <Leader>g :<C-u>Unite -no-quit -winheight=10 -buffer-name=grep grep:.<CR>
 
 " Yank history
-nnoremap <Leader>h :<C-u>Unite -start-insert -buffer-name=yanks history/yank<CR>
+nnoremap <Leader>h :<C-u>Unite -buffer-name=yanks history/yank<CR>
 
 " Tags
 nnoremap <Leader>t :<C-u>Unite -start-insert -buffer-name=tags tag<CR>
 
 " Outline
-nnoremap <Leader>o :<C-u>Unite -buffer-name=outline -vertical outline<CR>
+nnoremap <Leader>o :<C-u>Unite -winwidth=40 -buffer-name=outline -vertical outline<CR>
 
 " Set up some custom ignores
 call unite#custom_source('file_rec,file_rec/async,file_mru,file,buffer,grep',
@@ -211,6 +212,7 @@ call unite#custom_source('file_rec,file_rec/async,file_mru,file,buffer,grep',
       \ 'tmp/',
       \ '.pyc',
       \ '.swp',
+      \ 'tags',
       \ ], '\|'))
 
 " Custom mappings for the unite buffer
@@ -234,6 +236,8 @@ if v:version >= 704
     let g:ycm_show_diagnostics_ui = 0
     " let g:ycm_enable_diagnostic_signs = 1
     nnoremap <Leader>jd :YcmCompleter GoTo<CR>
+else
+    nnoremap <Leader>jd <nop>
 endif
 
 " Gundo
@@ -245,13 +249,15 @@ nmap f <Plug>Sneak_f
 nmap F <Plug>Sneak_F
 xmap f <Plug>Sneak_f
 xmap F <Plug>Sneak_F
-" Not doing the operator pending modes (omap) because it messes with
-" repeat operation after doing something like ct/newtext<Esc>
+omap f <Plug>Sneak_f
+omap F <Plug>Sneak_F
 
 nmap t <Plug>Sneak_t
 nmap T <Plug>Sneak_T
 xmap t <Plug>Sneak_t
 xmap T <Plug>Sneak_T
+omap t <Plug>Sneak_t
+omap T <Plug>Sneak_T
 
 " Clever S mode
 let g:sneak#s_next = 1
@@ -274,31 +280,33 @@ vnoremap <Leader>p "+p
 vnoremap <Leader>P "+P
 
 " Move up/down display lines instead of actual lines
-nnoremap j gj
-nnoremap k gk
+noremap j gj
+noremap k gk
 
 " Move up/down actual lines whenever necessary
-nnoremap gj j
-nnoremap gk k
+noremap gj j
+noremap gk k
 
 " Quit all, useful in vimdiff
 nnoremap <Leader>q :qa<CR>
 
 " Working with buffers
-if has("gui_running")
-    nnoremap <C-Tab> :bnext<CR>
-    nnoremap <C-S-Tab> :bprevious<CR>
-else
-    nnoremap gt :bnext<CR>
-    nnoremap gT :bprevious<CR>
-endif
+" if has("gui_running")
+"     nnoremap <C-Tab> :bnext<CR>
+"     nnoremap <C-S-Tab> :bprevious<CR>
+" else
+"     nnoremap gt :bnext<CR>
+"     nnoremap gT :bprevious<CR>
+" endif
+nnoremap ]b :bnext<CR>
+nnoremap [b :bprevious<CR>
 
 " Jumping to buffer
 nnoremap <Leader>b :buffers<CR>:buffer 
 
 " IntelligentQuit, :Q works for closing 
 " windows and buffers both
-command! -bang Q :call g:IntelligentQuit(<bang>0)
+command! -bang Q :call IntelligentQuit(<bang>0)
 
 " Keep text centered when searching
 " and open fold if hit is inside fold
@@ -324,9 +332,14 @@ augroup cpp_parent_block
     autocmd FileType cpp,c nnoremap ]] ]}
 augroup END
 
-" Make
-nnoremap <F9> :call g:BuildOrRun("/build/gcc-debug")<CR>
-
+augroup build_or_run
+    autocmd!
+    " Make
+    au FileType cpp,c nnoremap <silent> <F9> :call BuildInSubDir("build/gcc-debug")<CR>
+    " Run
+    au FileType python nnoremap <silent> <F9> :!./%<CR>
+augroup END
+    
 " Navigating quickfix list
 nnoremap ]q :cnext<CR>
 nnoremap [q :cprevious<CR>
@@ -359,7 +372,7 @@ cnoreabbrev q <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'Q' : 'q')<CR>
 cnoreabbrev wq <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'w\|Q' : 'wq')<CR>
 
 " Switch to .h file if on .cpp file, or vice versa
-nnoremap <Leader>a :call g:AlternateSourceFile()<CR>
+nnoremap <silent> <Leader>a :call AlternateSourceFile()<CR>
 
 " Standardized the behaviour of D
 nnoremap D d$
@@ -371,7 +384,7 @@ noremap H ^
 noremap L g_
 
 " Clear search
-nnoremap <Leader><Space> :noh<CR>
+nnoremap <silent> <Leader><Space> :noh<CR>
 
 " Don't open manual
 nnoremap K <nop>
@@ -384,8 +397,8 @@ nnoremap zR zRzz
 " the set paste mode temporarily turns off auto indent, so a 
 " comment character isn't entered if the mapping is triggered 
 " from within a comment.
-nnoremap <silent>[<Space> :set paste<CR>m`O<Esc>``:set nopaste<CR>
-nnoremap <silent>]<Space> :set paste<CR>m`o<Esc>``:set nopaste<CR>
+nnoremap <silent> [<Space> :set paste<CR>m`O<Esc>``:set nopaste<CR>
+nnoremap <silent> ]<Space> :set paste<CR>m`o<Esc>``:set nopaste<CR>
 
 """ AUTOCOMMANDS
 " (that don't fit into any above categories)
@@ -407,6 +420,12 @@ augroup cursorline
     au FocusLost,WinLeave,InsertEnter * set nocul
 augroup END
 
+" Open quickfix window on top
+augroup quickfix_on_top
+    au FileType qf wincmd K
+augroup END
+
+" Fed up of folds
 " Remembers my folds when switching between buffers. Keeps only one view
 " per file. This shouldn't be necessary, but apparently there is some plugin
 " which folds everything I had unfolded before I left a buffer (because this
@@ -414,16 +433,18 @@ augroup END
 " which plugin is responsible.
 " TODO Figure out a way to delete the created view file
 " TODO Doesn't work always
-augroup please_keep_my_fold_state
-    autocmd!
-    set viewoptions="folds,cursor"
-    autocmd BufWinLeave * if expand("%") != "" | mkview! | endif
-    autocmd BufWinEnter * if expand("%") != "" | loadview | endif
-augroup END
+" augroup please_keep_my_fold_state
+"     autocmd!
+"     if !&diff
+"         set viewoptions="folds,cursor"
+"         autocmd BufWinLeave * if expand("%") != "" | mkview! | endif
+"         autocmd BufWinEnter * if expand("%") != "" | loadview | endif
+"     endif
+" augroup END
 
 """" FUNCTIONS
 
-function! g:ToggleNuMode()
+function! ToggleNuMode()
   if(&relativenumber == 1)
     set relativenumber!
   else
@@ -432,9 +453,9 @@ function! g:ToggleNuMode()
 endfunc
 
 " TODO conflicts with split movement
-" noremap <C-l> :call g:ToggleNuMode()<CR>
+" noremap <C-l> :call ToggleNuMode()<CR>
 
-function! g:IntelligentQuit(ignore_changes)
+function! IntelligentQuit(ignore_changes)
     " Closes the window if more than one window, deletes a buffer if
     " more than one buffer. Else calls :q
     let num_bufs = len(filter(range(1, bufnr('$')), 'buflisted(v:val)')) 
@@ -458,20 +479,27 @@ function! g:IntelligentQuit(ignore_changes)
     endif
 endfunc
 
-function! g:BuildOrRun(buildsubdir)
-    " Runs make on c++ files in the passed subdirectory (inside toplevel project
-    " dir) and runs from same dir if python script
-    let curr_filetype = &filetype
-    if(curr_filetype ==? "python")
-        :!./%
-    elseif(curr_filetype ==? "cpp")
-        let toplevelpath = FindTopLevelProjectDir()
-        let builddir = toplevelpath . a:buildsubdir
-        :execute 'make -j21 -C ' . builddir
-    endif
+function! BuildInSubDir(buildsubdir)
+    " Runs make on c++ files in the passed subdirectory (under the
+    " toplevel project dir) 
+    let toplevelpath = FindTopLevelProjectDir()
+    let builddir = toplevelpath . a:buildsubdir
+    :execute 'make -j21 -C ' . builddir
 endfunction
 
-function! g:AlternateSourceFile()
+function! FindTopLevelProjectDir()
+    " Searches for a .git directory upward till root.
+    let isittopdir = finddir('.git') 
+    if isittopdir ==? ".git"
+        return getcwd() . '/'
+    endif
+    let gitdir = finddir('.git', ';')
+    let gitdirsplit = split(gitdir, '/')
+    let toplevelpath = '/' . join(gitdirsplit[:-2],'/') . '/'
+    return toplevelpath
+endfunction
+
+function! AlternateSourceFile()
     " If on a .cpp file, switches to its .h file, or vice versa.
     if(expand('%:p:t:e') ==? "cpp")
         :find %:p:t:r.h
@@ -519,18 +547,6 @@ hi def InterestingWord3 guifg=#000000 ctermfg=16 guibg=#8cffba ctermbg=121
 hi def InterestingWord4 guifg=#000000 ctermfg=16 guibg=#b88853 ctermbg=137
 hi def InterestingWord5 guifg=#000000 ctermfg=16 guibg=#ff9eb8 ctermbg=211
 hi def InterestingWord6 guifg=#000000 ctermfg=16 guibg=#ff2c4b ctermbg=195
-
-function! FindTopLevelProjectDir()
-    " Searches for a .git directory upward till root.
-    let isittopdir = finddir('.git') 
-    if isittopdir ==? ".git"
-        return getcwd()
-    endif
-    let gitdir = finddir('.git', ';')
-    let gitdirsplit = split(gitdir, '/')
-    let toplevelpath = '/' . join(gitdirsplit[:-2],'/')
-    return toplevelpath
-endfunction
 
 """" COLORSCHEMES
 
