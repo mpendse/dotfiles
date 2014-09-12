@@ -112,7 +112,6 @@ NeoBundle 'Shougo/neomru.vim'
 NeoBundle 'Shougo/unite.vim'
 NeoBundle 'terryma/vim-smooth-scroll'
 NeoBundle 'tpope/vim-abolish'
-NeoBundle 'tpope/vim-dispatch'
 NeoBundle 'octol/vim-cpp-enhanced-highlight'
 NeoBundle 'tpope/vim-surround'
 NeoBundle 'tsukkee/unite-tag'
@@ -121,6 +120,7 @@ NeoBundle 'sjl/gundo.vim'
 NeoBundle 'tpope/vim-obsession'
 NeoBundle 'tpope/vim-eunuch'
 NeoBundle 'tpope/vim-repeat'
+" NeoBundle 'tpope/vim-dispatch'
 " NeoBundle 'gregsexton/gitv'
 " NeoBundle 'SirVer/ultisnips'
 " NeoBundle 'honza/vim-snippets'
@@ -173,7 +173,7 @@ let g:airline#extensions#whitespace#checks = [ 'indent' ]
 " Removing separators
 let g:airline_left_sep=''
 let g:airline_right_sep=''
-"
+
 " Enable the list of buffers
 let g:airline#extensions#tabline#enabled = 1
 
@@ -265,6 +265,10 @@ let g:sneak#s_next = 1
 " Case determined by ignorecase / smartcase
 let g:sneak#use_ic_scs = 1
 
+" Targets.vim settings
+" Using 'q' as an alias for double quotes
+let g:targets_quotes = '"q '' `'
+
 """" MAPPINGS
 
 " Copy Paste from system clipboard
@@ -328,16 +332,16 @@ xnoremap . :normal .<CR>
 " Map [[ to [{ for cpp files because it is easier to move to parent block
 augroup cpp_parent_block
     autocmd!
-    autocmd FileType cpp,c nnoremap [[ [{
-    autocmd FileType cpp,c nnoremap ]] ]}
+    autocmd FileType cpp,c noremap <buffer> [[ [{
+    autocmd FileType cpp,c noremap <buffer> ]] ]}
 augroup END
 
 augroup build_or_run
     autocmd!
     " Make
-    au FileType cpp,c nnoremap <silent> <F9> :call BuildInSubDir("build/gcc-debug")<CR>
+    au FileType cpp,c nnoremap <silent> <buffer> <F9> :call BuildInSubDir("build/gcc-debug")<CR>
     " Run
-    au FileType python nnoremap <silent> <F9> :!./%<CR>
+    au FileType python nnoremap <silent> <buffer> <F9> :!./%<CR>
 augroup END
     
 " Navigating quickfix list
@@ -377,6 +381,9 @@ nnoremap <silent> <Leader>a :call AlternateSourceFile()<CR>
 " Standardized the behaviour of D
 nnoremap D d$
 
+" Standardized the behaviour of Y
+nnoremap Y y$
+
 " H: Go to beginning of line.
 noremap H ^
 
@@ -407,6 +414,7 @@ if v:version >= 704
     " Switching between hybrid numbering and absolute numbering mode
     augroup numbering
         autocmd!
+        autocmd VimEnter * set relativenumber number
         autocmd WinEnter,FocusGained * set relativenumber number
         autocmd WinLeave,FocusLost * set relativenumber!
         autocmd InsertEnter * set relativenumber!
@@ -421,8 +429,10 @@ augroup cursorline
 augroup END
 
 " Open quickfix window on top
+" Also 'q' quits, mimicking unite.
 augroup quickfix_on_top
     au FileType qf wincmd K
+    au FileType qf nmap <buffer> q :q<CR>
 augroup END
 
 " Fed up of folds
@@ -547,6 +557,34 @@ hi def InterestingWord3 guifg=#000000 ctermfg=16 guibg=#8cffba ctermbg=121
 hi def InterestingWord4 guifg=#000000 ctermfg=16 guibg=#b88853 ctermbg=137
 hi def InterestingWord5 guifg=#000000 ctermfg=16 guibg=#ff9eb8 ctermbg=211
 hi def InterestingWord6 guifg=#000000 ctermfg=16 guibg=#ff2c4b ctermbg=195
+
+" ClangCheck
+function! ClangCheckImpl(cmd)
+    if &autowrite | wall | endif
+        echo "Running " . a:cmd . " ..."
+        let l:output = system(a:cmd)
+        cexpr l:output
+        cwindow
+        let w:quickfix_title = a:cmd
+        if v:shell_error != 0
+          cc
+        endif
+        let g:clang_check_last_cmd = a:cmd
+endfunction
+
+function! ClangCheck(buildpath)
+    let l:filename = expand('%')
+    let toplevelpath = FindTopLevelProjectDir()
+    if l:filename =~ '\.\(cpp\|cxx\|cc\|c\)$'
+        call ClangCheckImpl("clang-check " . l:filename . " -p " . toplevelpath . a:buildpath)
+    elseif exists("g:clang_check_last_cmd")
+        call ClangCheckImpl(g:clang_check_last_cmd)
+    else
+        echo "Can't detect file's compilation arguments and no previous clang-check invocation!"
+    endif
+endfunction
+
+nnoremap <silent> <F5> :call ClangCheck("build/gcc-debug")<CR>
 
 """" COLORSCHEMES
 
