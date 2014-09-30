@@ -12,6 +12,8 @@ alias rm='rm -I'
 alias gvims='gvim --servername GVIM'
 alias gvimr='gvim --remote'
 alias retag='ctags -R --exclude=build --exclude=.git --exclude=log --exclude=.swp *'
+alias die=try_die_try_again
+alias lock='gnome-screensaver-command -l'
 
 # vi mode
 set -o vi
@@ -40,4 +42,14 @@ quit_vim_style ()
             * ) break;;
         esac
     done
+}
+
+try_die_try_again ()
+{
+    kill $1
+    sleep 2
+    jobs=$(ps --pid $1 | wc -l)
+    if [ $jobs -eq 2 ]; then
+        kill -9 $1
+    fi
 }

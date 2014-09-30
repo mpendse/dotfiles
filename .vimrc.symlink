@@ -61,17 +61,14 @@ set scrolloff=5
 set wildmode=longest,list,full
 set wildmenu
 
-if has('gui_running')
-    " No menu/tool bar in gvim
-    set guioptions-=m
-    set guioptions-=T
-endif
-
 " Check for local tag file first and then in parent directory then check till /
 set tags=tags,./tags;/
 
 " Don't clobber the unnamed register when pasting over text in visual mode. 
 vnoremap p pgvy
+
+" Trying a leader mapping
+map <Space> <Leader>
 
 """" PLUGINS
 
@@ -88,7 +85,7 @@ NeoBundleFetch 'Shougo/neobundle.vim'
 if v:version >= 704
     NeoBundle 'Valloric/YouCompleteMe'
 else
-    NeoBundle 'Shougo/neocomplcache.vim'
+    " NeoBundle 'Shougo/neocomplcache.vim'
 endif
 NeoBundle 'tpope/vim-commentary'
 NeoBundle 'bling/vim-airline'
@@ -120,10 +117,18 @@ NeoBundle 'sjl/gundo.vim'
 NeoBundle 'tpope/vim-obsession'
 NeoBundle 'tpope/vim-eunuch'
 NeoBundle 'tpope/vim-repeat'
+NeoBundle 'sickill/vim-monokai'
+NeoBundle 'jonathanfilip/vim-lucius'
+NeoBundle 'chriskempson/base16-vim'
+NeoBundle 'sickill/vim-pasta'
+NeoBundle 'vim-scripts/ViewPort'
+NeoBundle 'mhinz/vim-startify'
+NeoBundle 'mpendse/vim-interestingwords'
+" NeoBundle 'vasconcelloslf/vim-interestingwords'
 " NeoBundle 'tpope/vim-dispatch'
 " NeoBundle 'gregsexton/gitv'
-" NeoBundle 'SirVer/ultisnips'
-" NeoBundle 'honza/vim-snippets'
+NeoBundle 'SirVer/ultisnips'
+NeoBundle 'honza/vim-snippets'
 " NeoBundle 'Shougo/neocomplete.vim'   " Requires Vim 7.3.885+ and Lua enabled.
 " NeoBundle 'kien/ctrlp.vim'
 " NeoBundle 'LaTeX-Box-Team/LaTeX-Box'
@@ -152,14 +157,15 @@ augroup END
 " Supertab settings
 let g:SuperTabDefaultCompletionType = "<c-n>"
 
+" Fed up of problems with smoothscroll
 " disable smoothscroll in diff mode (it is slow as it is)
-if !&diff
-    " smoothscroll mappings
-    nnoremap <silent> <c-u> :call smooth_scroll#up(&scroll, 5, 2)<CR>
-    nnoremap <silent> <c-d> :call smooth_scroll#down(&scroll, 5, 2)<CR>
-    nnoremap <silent> <c-b> :call smooth_scroll#up(&scroll*2, 5, 4)<CR>
-    nnoremap <silent> <c-f> :call smooth_scroll#down(&scroll*2, 5, 4)<CR>
-endif
+" if !&diff
+"     " smoothscroll mappings
+"     nnoremap <silent> <c-u> :call smooth_scroll#up(&scroll, 5, 2)<CR>
+"     nnoremap <silent> <c-d> :call smooth_scroll#down(&scroll, 5, 2)<CR>
+"     nnoremap <silent> <c-b> :call smooth_scroll#up(&scroll*2, 5, 4)<CR>
+"     nnoremap <silent> <c-f> :call smooth_scroll#down(&scroll*2, 5, 4)<CR>
+" endif
 
 " Override for latex filetype. (used with LaTex-Box plugin)
 " let g:tex_flavor='latex'
@@ -180,6 +186,19 @@ let g:airline#extensions#tabline#enabled = 1
 " Show buffer numbers
 let g:airline#extensions#tabline#buffer_nr_show = 1
 
+" Put hostname before filename
+function! GetHostname()
+    let hostname = system("hostname")
+    return hostname[:-2] . ' │ '
+endfunction
+
+function! AirlineInit()
+    call airline#parts#define_function('hostname', 'GetHostname')
+    call airline#parts#define_minwidth('hostname', 80)      " show hostname only if width >= 80
+    let g:airline_section_c = airline#section#create(['hostname', 'file'])
+endfunction
+au VimEnter * call AirlineInit()
+
 " Unite settings
 " Use fuzzy matcher for everything
 call unite#filters#matcher_default#use(['matcher_fuzzy'])
@@ -190,8 +209,11 @@ let g:unite_source_history_yank_enable = 1
 " File search
 nnoremap <Leader>f :<C-u>Unite -start-insert -buffer-name=files file directory file_rec/async:!<CR>
 
-" Buffer and mru search
-nnoremap <Leader>r :<C-u>Unite -start-insert -buffer-name=buffers buffer file_mru <CR>
+" MRU search
+nnoremap <Leader>r :<C-u>Unite -start-insert -buffer-name=mru file_mru<CR>
+
+" Buffer list
+nnoremap <Leader>b :<C-u>Unite -start-insert -buffer-name=buffers buffer<CR>
 
 " Grep from cwd
 nnoremap <Leader>g :<C-u>Unite -no-quit -winheight=10 -buffer-name=grep grep:.<CR>
@@ -204,6 +226,10 @@ nnoremap <Leader>t :<C-u>Unite -start-insert -buffer-name=tags tag<CR>
 
 " Outline
 nnoremap <Leader>o :<C-u>Unite -winwidth=40 -buffer-name=outline -vertical outline<CR>
+
+" Search for text in all open buffers
+nnoremap <Leader>s :<C-u>Unite -start-insert -custom-grep-search-word-highlight=Normal 
+            \-buffer-name=buffer-search grep:$buffers::.<CR>
 
 " Set up some custom ignores
 call unite#custom_source('file_rec,file_rec/async,file_mru,file,buffer,grep',
@@ -269,6 +295,47 @@ let g:sneak#use_ic_scs = 1
 " Using 'q' as an alias for double quotes
 let g:targets_quotes = '"q '' `'
 
+" Settings for making UltiSnips/Supertab/Youcomplete play nice with each other
+" Found on StackOverflow.
+" make YCM compatible with UltiSnips (using supertab)
+let g:ycm_key_list_select_completion = ['<C-n>', '<Down>']
+let g:ycm_key_list_previous_completion = ['<C-p>', '<Up>']
+let g:SuperTabDefaultCompletionType = '<C-n>'
+
+" better key bindings for UltiSnipsExpandTrigger
+let g:UltiSnipsExpandTrigger = "<c-j>"
+let g:UltiSnipsJumpForwardTrigger = "<c-n>"
+let g:UltiSnipsJumpBackwardTrigger = "<c-p>"
+
+" vim-pasta settings
+" Enable the indent-aware-paste only on c and cpp files.
+let g:pasta_enabled_filetypes = ['c', 'cpp']
+
+" Trying vim-viewport (like narrow-region)
+vnoremap <Leader>vp :Vpedit<CR>
+
+" Trying out vim-startify
+let g:startify_session_dir = '~/sessions'
+let g:startify_list_order = [ ['Sessions'], 'sessions']
+let g:startify_change_to_dir = 0
+let g:startify_custom_header = [
+            \ '',
+            \ '',
+            \ '                         VIM - Vi IMproved                       ',
+            \ '                                                                 ',
+            \ '                            version 7.4                          ',
+            \ '                     by Bram Moolenaar et al.                    ',
+            \ '            Vim is open source and freely distributable          ',
+            \ '',
+            \ '',
+            \ ]
+
+" Trying out vim-interestingwords
+let g:interestingWordsDefaultMappings = 0 " This disables its default mappings (only on my fork)
+let g:interestingWordsRandomiseColors = 1
+nnoremap <silent> <Leader>c :call InterestingWords()<CR>
+nnoremap <silent> <Leader>C :call UncolorAllWords()<CR>
+
 """" MAPPINGS
 
 " Copy Paste from system clipboard
@@ -295,18 +362,8 @@ noremap gk k
 nnoremap <Leader>q :qa<CR>
 
 " Working with buffers
-" if has("gui_running")
-"     nnoremap <C-Tab> :bnext<CR>
-"     nnoremap <C-S-Tab> :bprevious<CR>
-" else
-"     nnoremap gt :bnext<CR>
-"     nnoremap gT :bprevious<CR>
-" endif
 nnoremap ]b :bnext<CR>
 nnoremap [b :bprevious<CR>
-
-" Jumping to buffer
-nnoremap <Leader>b :buffers<CR>:buffer 
 
 " IntelligentQuit, :Q works for closing 
 " windows and buffers both
@@ -390,7 +447,7 @@ noremap H ^
 " L: Go to end of line
 noremap L g_
 
-" Clear search
+" Toggle search highlighting
 nnoremap <silent> <Leader><Space> :noh<CR>
 
 " Don't open manual
@@ -399,13 +456,16 @@ nnoremap K <nop>
 " Center curzor on opening all folds
 nnoremap zR zRzz
 
-" Trying out a insert blank line above or below mapping.
+" Insert blank line above or below.
 " the mark prevents from losing cursor position and
 " the set paste mode temporarily turns off auto indent, so a 
 " comment character isn't entered if the mapping is triggered 
 " from within a comment.
 nnoremap <silent> [<Space> :set paste<CR>m`O<Esc>``:set nopaste<CR>
 nnoremap <silent> ]<Space> :set paste<CR>m`o<Esc>``:set nopaste<CR>
+
+" Don't move on *
+nnoremap <silent> * :let stay_star_view = winsaveview()<CR>*:call winrestview(stay_star_view)<CR>
 
 """ AUTOCOMMANDS
 " (that don't fit into any above categories)
@@ -424,6 +484,7 @@ endif
 
 " Cursorline only in normal mode and when window is focused.
 augroup cursorline
+    autocmd!
     au BufWinEnter,FocusGained,WinEnter,InsertLeave * set cul
     au FocusLost,WinLeave,InsertEnter * set nocul
 augroup END
@@ -431,6 +492,7 @@ augroup END
 " Open quickfix window on top
 " Also 'q' quits, mimicking unite.
 augroup quickfix_on_top
+    autocmd!
     au FileType qf wincmd K
     au FileType qf nmap <buffer> q :q<CR>
 augroup END
@@ -490,7 +552,7 @@ function! IntelligentQuit(ignore_changes)
 endfunc
 
 function! BuildInSubDir(buildsubdir)
-    " Runs make on c++ files in the passed subdirectory (under the
+    " Runs make in the passed subdirectory (under the
     " toplevel project dir) 
     let toplevelpath = FindTopLevelProjectDir()
     let builddir = toplevelpath . a:buildsubdir
@@ -517,46 +579,6 @@ function! AlternateSourceFile()
         :find %:p:t:r.cpp
     endif
 endfunction
-
-" Highlight Word 
-"
-" This mini-plugin provides a few mappings for highlighting words temporarily.
-" n is a number from 1-6 to highlight the current word in a specific color.
-" Taken from Steve Losh's vimrc.
-" TODO haven't figured out a convenient way to invoke this yet. 
-" keymapping or command?
-" Bigger TODO Does not highlight -__-
-
-function! HiInterestingWord(n)
-    " Save our location.
-    normal! mz
-
-    " Yank the current word into the z register.
-    normal! "zyiw
-
-    " Calculate an arbitrary match ID.  Hopefully nothing else is using it.
-    let mid = 86750 + a:n
-
-    " Clear existing matches, but don't worry if they don't exist.
-    silent! call matchdelete(mid)
-
-    " Construct a literal pattern that has to match at boundaries.
-    let pat = '\V\<' . escape(@z, '\') . '\>'
-
-    " Actually match the words.
-    call matchadd("InterestingWord" . a:n, pat, 1, mid)
-
-    " Move back to our original location.
-    normal! `z
-endfunction 
-
-" Highlight groups used by above function
-hi def InterestingWord1 guifg=#000000 ctermfg=16 guibg=#ffa724 ctermbg=214
-hi def InterestingWord2 guifg=#000000 ctermfg=16 guibg=#aeee00 ctermbg=154
-hi def InterestingWord3 guifg=#000000 ctermfg=16 guibg=#8cffba ctermbg=121
-hi def InterestingWord4 guifg=#000000 ctermfg=16 guibg=#b88853 ctermbg=137
-hi def InterestingWord5 guifg=#000000 ctermfg=16 guibg=#ff9eb8 ctermbg=211
-hi def InterestingWord6 guifg=#000000 ctermfg=16 guibg=#ff2c4b ctermbg=195
 
 " ClangCheck
 function! ClangCheckImpl(cmd)
@@ -589,7 +611,7 @@ nnoremap <silent> <F5> :call ClangCheck("build/gcc-debug")<CR>
 """" COLORSCHEMES
 
 " 256 terminal colours
-set t_Co=256
+" set t_Co=256
 
 " Colorschemes
 " colo 256-grayvim
@@ -601,10 +623,10 @@ colo solarized
 " let g:zenburn_high_Contrast = 1
 " colo zenburn
 " colo wombat256
+" colo jellybeans
 
 " Stupid fucking foldcolumn gets sets to two somehow
-" Put at the end for that reason
-set fdc=0
+" set fdc=0
 
 if filereadable(glob("~/.vimrc.local"))
     source ~/.vimrc.local
@@ -615,7 +637,7 @@ if filereadable(".vimrc.project")
     source .vimrc.project
 endif
 
-"""" TRYING STUFF FROM SENSIBLE.VIM
+"""" STUFF FROM SENSIBLE.VIM
 
 if &listchars ==# 'eol:$'
     set listchars=tab:>\ ,trail:-,extends:>,precedes:<,nbsp:+
@@ -641,5 +663,31 @@ inoremap <C-U> <C-G>u<C-U>
 
 if &encoding ==# 'latin1' && has('gui_running')
     set encoding=utf-8
+endif
+
+if !&scrolloff
+    set scrolloff=1
+endif
+if !&sidescrolloff
+    set sidescrolloff=5
+endif
+set display+=lastline
+
+if &shell =~# 'fish$'
+    set shell=/bin/bash
+endif
+
+set nrformats-=octal
+
+"""" GUI SETTINGS 
+
+if has('gui_running')
+    " No menu/tool bar in gvim
+    set guioptions-=m
+    set guioptions-=T
+    " console-like dialogs instead of graphical popup.
+    set guioptions+=c
+    colo base16-default
+    let g:airline_theme='base16'
 endif
 
