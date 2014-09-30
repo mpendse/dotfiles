@@ -162,9 +162,13 @@ Plug 'mpendse/vim-interestingwords'
 Plug 'whatyouhide/vim-gotham'
 " Plug 'tpope/vim-vinegar'
 Plug 'jeetsukumaran/vim-filebeagle'
+Plug 'guns/vim-clojure-static', { 'for' : 'clojure' }
+Plug 'tpope/vim-fireplace', { 'for' : 'clojure' }
+Plug 'vim-scripts/paredit.vim', { 'for' : 'clojure' }
 Plug 'haya14busa/incsearch.vim'
 Plug 'junegunn/fzf', { 'dir' : '~/.fzf', 'do': './install', 'on' : 'FZF' }
 Plug 'ajh17/Spacegray.vim'
+Plug 'tpope/vim-scriptease', { 'for' : 'vim' }
 " Plug 'vasconcelloslf/vim-interestingwords'
 " Plug 'tpope/vim-dispatch'
 " Plug 'gregsexton/gitv'
@@ -474,6 +478,8 @@ augroup build_or_run
     au FileType cpp,c nnoremap <silent> <buffer> <F9> :call BuildInSubDir("build/gcc-debug")<CR>
     " Run
     au FileType python nnoremap <silent> <buffer> <F9> :!./%<CR>
+
+    au FileType clojure nnoremap <silent> <buffer> <F9> :!lein do compile, run<CR>
 augroup END
     
 " Navigating quickfix list
