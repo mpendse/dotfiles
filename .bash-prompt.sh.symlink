@@ -53,7 +53,7 @@ __jobs_count()
 
 __hostname()
 {
-    if [ $HOSTNAME != "off-dev-l006" ]; then
+    if [ $HOSTNAME != "of2-dev-l006" ]; then
         printf "@$HOSTNAME";
     fi
 }

@@ -9,9 +9,12 @@ alias ack='ack-grep'
 alias soap='source activate py3k'
 alias sod='source deactivate'
 alias rm='rm -I'
-alias gvims='gvim --servername GVIM'
-alias gvimr='gvim --remote'
+alias gvims='\gvim --servername GVIM'
+alias gvimr='\gvim --remote'
+alias gvim='nohup gvim > /dev/null 2>&1'
 alias retag='ctags -R --exclude=build --exclude=.git --exclude=log --exclude=.swp *'
+# Here lies horrible quoting
+alias rescope='find $PWD -name '\''*.cpp'\'' -o -name '\''*.h'\'' -o -name '\''*.c'\'' -o -name '\''*.cxx'\'' -o -name '\''*.hxx'\'' > cscope.files && cscope -b'
 alias die=try_die_try_again
 alias lock='gnome-screensaver-command -l'
 

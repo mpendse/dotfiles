@@ -64,78 +64,104 @@ set wildmenu
 " Check for local tag file first and then in parent directory then check till /
 set tags=tags,./tags;/
 
-" Don't clobber the unnamed register when pasting over text in visual mode. 
-vnoremap p pgvy
+" Don't redraw while executing macros
+set lazyredraw
 
 " Trying a leader mapping
 map <Space> <Leader>
 
-"""" PLUGINS
-
-if has('vim_starting')
-    set runtimepath+=~/.vim/bundle/neobundle.vim/
+" Cscope
+if has('cscope')
+    set cscopeverbose
+    set cscopequickfix=s-,c-,d-,i-,t-,e-
+    if filereadable("cscope.out")
+        cs add cscope.out
+    endif
 endif
 
-call neobundle#rc(expand('~/.vim/bundle/'))
 
-" Let NeoBundle manage NeoBundle
-NeoBundleFetch 'Shougo/neobundle.vim'
+"""" PLUGINS
+
+if empty(glob('~/.vim/autoload/plug.vim'))
+  silent !mkdir -p ~/.vim/autoload
+  silent !curl -fLo ~/.vim/autoload/plug.vim
+    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  autocmd VimEnter * PlugInstall
+endif
+
+" Build function for vimproc (post update hook for vim-plug)
+function! BuildVimProc(info)
+    if has("win32unix")
+        :!make -f make_cygwin.mak
+    elseif has("win32")
+        " :!make -f make_mingw32.mak
+        " It's possible this may not work
+        :!tools\\update-dll-mingw
+    elseif has("unix")
+        let s:uname = system("uname -s")
+        if !v:shell_error && s:uname == "Darwin\n"
+            :!make -f make_mac.mak
+        else
+            :make
+        endif
+    else
+        :echom 'unrecognized OS'
+    endif
+endfunction
+
+call plug#begin('~/.vim/bundle')
 
 " Bundles
 if v:version >= 704
-    NeoBundle 'Valloric/YouCompleteMe'
+    Plug 'Valloric/YouCompleteMe', { 'do' : './install.sh --clang-completer' }
 else
-    " NeoBundle 'Shougo/neocomplcache.vim'
+    " Plug 'Shougo/neocomplcache.vim'
 endif
-NeoBundle 'tpope/vim-commentary'
-NeoBundle 'bling/vim-airline'
-NeoBundle 'vim-scripts/pythoncomplete'
-NeoBundle 'flazz/vim-colorschemes'
-NeoBundle 'ervandew/supertab'
-NeoBundle 'scrooloose/nerdtree'
-NeoBundle 'altercation/vim-colors-solarized'
-NeoBundle 'tpope/vim-fugitive'
-NeoBundle 'justinmk/vim-sneak'
-NeoBundle 'wellle/targets.vim'
-NeoBundle 'Shougo/vimproc', {
-      \ 'build' : {
-      \     'windows' : 'make -f make_mingw32.mak',
-      \     'cygwin' : 'make -f make_cygwin.mak',
-      \     'mac' : 'make -f make_mac.mak',
-      \     'unix' : 'make -f make_unix.mak',
-      \    },
-      \ }
-NeoBundle 'Shougo/neomru.vim'
-NeoBundle 'Shougo/unite.vim'
-NeoBundle 'terryma/vim-smooth-scroll'
-NeoBundle 'tpope/vim-abolish'
-NeoBundle 'octol/vim-cpp-enhanced-highlight'
-NeoBundle 'tpope/vim-surround'
-NeoBundle 'tsukkee/unite-tag'
-NeoBundle 'Shougo/unite-outline'
-NeoBundle 'sjl/gundo.vim'
-NeoBundle 'tpope/vim-obsession'
-NeoBundle 'tpope/vim-eunuch'
-NeoBundle 'tpope/vim-repeat'
-NeoBundle 'sickill/vim-monokai'
-NeoBundle 'jonathanfilip/vim-lucius'
-NeoBundle 'chriskempson/base16-vim'
-NeoBundle 'sickill/vim-pasta'
-NeoBundle 'vim-scripts/ViewPort'
-NeoBundle 'mhinz/vim-startify'
-NeoBundle 'mpendse/vim-interestingwords'
-" NeoBundle 'vasconcelloslf/vim-interestingwords'
-" NeoBundle 'tpope/vim-dispatch'
-" NeoBundle 'gregsexton/gitv'
-NeoBundle 'SirVer/ultisnips'
-NeoBundle 'honza/vim-snippets'
-" NeoBundle 'Shougo/neocomplete.vim'   " Requires Vim 7.3.885+ and Lua enabled.
-" NeoBundle 'kien/ctrlp.vim'
-" NeoBundle 'LaTeX-Box-Team/LaTeX-Box'
-" NeoBundle 'vim-scripts/AutoComplPop'
+Plug 'tpope/vim-commentary'
+Plug 'bling/vim-airline'
+Plug 'vim-scripts/pythoncomplete', { 'for' : 'python' }
+Plug 'flazz/vim-colorschemes'
+Plug 'ervandew/supertab'
+" Plug 'scrooloose/nerdtree'
+Plug 'altercation/vim-colors-solarized'
+Plug 'tpope/vim-fugitive'
+Plug 'justinmk/vim-sneak'
+Plug 'wellle/targets.vim'
+Plug 'Shougo/unite.vim'
+Plug 'Shougo/vimproc.vim', { 'do' : function('BuildVimProc') }
+Plug 'Shougo/neomru.vim'
+" Plug 'terryma/vim-smooth-scroll'
+Plug 'tpope/vim-abolish'
+Plug 'octol/vim-cpp-enhanced-highlight', { 'for' : 'cpp' }
+Plug 'tpope/vim-surround'
+Plug 'tsukkee/unite-tag'
+Plug 'Shougo/unite-outline'
+Plug 'sjl/gundo.vim', { 'on' : 'GundoToggle' }
+Plug 'tpope/vim-obsession'
+Plug 'tpope/vim-eunuch'
+Plug 'tpope/vim-repeat'
+Plug 'sickill/vim-monokai'
+Plug 'jonathanfilip/vim-lucius'
+Plug 'chriskempson/base16-vim'
+Plug 'sickill/vim-pasta'
+Plug 'vim-scripts/ViewPort', { 'on' : 'Vpedit' }
+Plug 'mhinz/vim-startify'
+Plug 'mpendse/vim-interestingwords'
+Plug 'whatyouhide/vim-gotham'
+Plug 'tpope/vim-vinegar'
+Plug 'haya14busa/incsearch.vim'
+Plug 'junegunn/fzf', { 'dir' : '~/.fzf', 'do': './install', 'on' : 'FZF' }
+" Plug 'vasconcelloslf/vim-interestingwords'
+" Plug 'tpope/vim-dispatch'
+" Plug 'gregsexton/gitv'
+Plug 'SirVer/ultisnips'
+Plug 'honza/vim-snippets'
+" Plug 'Shougo/neocomplete.vim'   " Requires Vim 7.3.885+ and Lua enabled.
+" Plug 'kien/ctrlp.vim'
+" Plug 'LaTeX-Box-Team/LaTeX-Box'
+" Plug 'vim-scripts/AutoComplPop'
 
-" Required for NeoBundle
-filetype plugin indent on
+call plug#end()
 
 """" PLUGIN SETTINGS
 
@@ -173,7 +199,7 @@ let g:SuperTabDefaultCompletionType = "<c-n>"
 " Airline settings
 let g:airline_theme='dark'
 "
-" Ignore trailing whitespaces, but pay attention to mixed indents
+" Ignore trailing whitespaces, but look out for mixed indents
 let g:airline#extensions#whitespace#checks = [ 'indent' ]
 
 " Removing separators
@@ -230,6 +256,9 @@ nnoremap <Leader>o :<C-u>Unite -winwidth=40 -buffer-name=outline -vertical outli
 " Search for text in all open buffers
 nnoremap <Leader>s :<C-u>Unite -start-insert -custom-grep-search-word-highlight=Normal 
             \-buffer-name=buffer-search grep:$buffers::.<CR>
+
+" Search for text in current buffer
+nnoremap <Leader>l :<C-u>Unite -start-insert -buffer-name=line line<CR>
 
 " Set up some custom ignores
 call unite#custom_source('file_rec,file_rec/async,file_mru,file,buffer,grep',
@@ -311,10 +340,10 @@ let g:UltiSnipsJumpBackwardTrigger = "<c-p>"
 " Enable the indent-aware-paste only on c and cpp files.
 let g:pasta_enabled_filetypes = ['c', 'cpp']
 
-" Trying vim-viewport (like narrow-region)
+" vim-viewport (like narrow-region)
 vnoremap <Leader>vp :Vpedit<CR>
 
-" Trying out vim-startify
+" vim-startify settings
 let g:startify_session_dir = '~/sessions'
 let g:startify_list_order = [ ['Sessions'], 'sessions']
 let g:startify_change_to_dir = 0
@@ -330,11 +359,16 @@ let g:startify_custom_header = [
             \ '',
             \ ]
 
-" Trying out vim-interestingwords
+" vim-interestingwords mappings
 let g:interestingWordsDefaultMappings = 0 " This disables its default mappings (only on my fork)
 let g:interestingWordsRandomiseColors = 1
 nnoremap <silent> <Leader>c :call InterestingWords()<CR>
 nnoremap <silent> <Leader>C :call UncolorAllWords()<CR>
+
+" Trying out improved incsearch
+map /  <Plug>(incsearch-forward)
+map ?  <Plug>(incsearch-backward)
+map g/ <Plug>(incsearch-stay)
 
 """" MAPPINGS
 
@@ -364,10 +398,6 @@ nnoremap <Leader>q :qa<CR>
 " Working with buffers
 nnoremap ]b :bnext<CR>
 nnoremap [b :bprevious<CR>
-
-" IntelligentQuit, :Q works for closing 
-" windows and buffers both
-command! -bang Q :call IntelligentQuit(<bang>0)
 
 " Keep text centered when searching
 " and open fold if hit is inside fold
@@ -402,8 +432,8 @@ augroup build_or_run
 augroup END
     
 " Navigating quickfix list
-nnoremap ]q :cnext<CR>
-nnoremap [q :cprevious<CR>
+nnoremap <silent> ]q :cnext<CR>
+nnoremap <silent> [q :cprevious<CR>
 
 inoremap jj <Esc>
 
@@ -424,6 +454,10 @@ vnoremap <silent> # :<C-U>
   \gvy?<C-R><C-R>=substitute(
   \escape(@", '?\.*$^~['), '\_s\+', '\\_s\\+', 'g')<CR><CR>
   \gV:call setreg('"', old_reg, old_regtype)<CR>
+
+" IntelligentQuit, :Q works for closing 
+" windows and buffers both
+command! -bang Q :call IntelligentQuit(<bang>0)
 
 " Abbreviation only works if it is a ':' command and 'q'(or wq) is in the first
 " column. q calls the Q command, which calls IntelligentQuit().
@@ -452,6 +486,9 @@ nnoremap <silent> <Leader><Space> :noh<CR>
 
 " Don't open manual
 nnoremap K <nop>
+
+" Don't clobber the unnamed register when pasting over text in visual mode. 
+vnoremap p pgvy
 
 " Center curzor on opening all folds
 nnoremap zR zRzz
@@ -516,17 +553,6 @@ augroup END
 
 """" FUNCTIONS
 
-function! ToggleNuMode()
-  if(&relativenumber == 1)
-    set relativenumber!
-  else
-    set relativenumber
-  endif
-endfunc
-
-" TODO conflicts with split movement
-" noremap <C-l> :call ToggleNuMode()<CR>
-
 function! IntelligentQuit(ignore_changes)
     " Closes the window if more than one window, deletes a buffer if
     " more than one buffer. Else calls :q
@@ -556,7 +582,8 @@ function! BuildInSubDir(buildsubdir)
     " toplevel project dir) 
     let toplevelpath = FindTopLevelProjectDir()
     let builddir = toplevelpath . a:buildsubdir
-    :execute 'make -j21 -C ' . builddir
+    :execute 'make -j32 -C ' . builddir
+    cw
 endfunction
 
 function! FindTopLevelProjectDir()
@@ -574,24 +601,24 @@ endfunction
 function! AlternateSourceFile()
     " If on a .cpp file, switches to its .h file, or vice versa.
     if(expand('%:p:t:e') ==? "cpp")
-        :find %:p:t:r.h
+        :find %:p:r.h
     elseif(expand('%:p:t:e') ==? "h")
-        :find %:p:t:r.cpp
+        :find %:p:r.cpp
     endif
 endfunction
 
 " ClangCheck
 function! ClangCheckImpl(cmd)
     if &autowrite | wall | endif
-        echo "Running " . a:cmd . " ..."
-        let l:output = system(a:cmd)
-        cexpr l:output
-        cwindow
-        let w:quickfix_title = a:cmd
-        if v:shell_error != 0
-          cc
-        endif
-        let g:clang_check_last_cmd = a:cmd
+    echo "Running " . a:cmd . " ..."
+    let l:output = system(a:cmd)
+    cexpr l:output
+    cwindow
+    let w:quickfix_title = a:cmd
+    if v:shell_error != 0
+      cc
+    endif
+    let g:clang_check_last_cmd = a:cmd
 endfunction
 
 function! ClangCheck(buildpath)
@@ -608,9 +635,22 @@ endfunction
 
 nnoremap <silent> <F5> :call ClangCheck("build/gcc-debug")<CR>
 
+" Basic Ack (till I cave and install the plugin)
+function! Ack(args)
+    let efm_bak = &efm
+    set efm=%f:%l:%m
+    let cmd = "ack-grep --nocolor --nogroup --ignore-dir=build " . a:args
+    cexpr system(cmd)
+    let &efm = efm_bak
+    copen
+endfunction
+
+command! -nargs=* -complete=file Ack call Ack(<q-args>)
+
 """" COLORSCHEMES
 
 " 256 terminal colours
+" Not needed if your term variable shows a 256 colour terminal.
 " set t_Co=256
 
 " Colorschemes
@@ -624,9 +664,6 @@ colo solarized
 " colo zenburn
 " colo wombat256
 " colo jellybeans
-
-" Stupid fucking foldcolumn gets sets to two somehow
-" set fdc=0
 
 if filereadable(glob("~/.vimrc.local"))
     source ~/.vimrc.local
