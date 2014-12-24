@@ -7,7 +7,8 @@ set nocompatible
 set nu
 
 " Autoindent
-set ai smartindent
+set ai
+filetype indent on
 
 " Ruler
 set ruler
@@ -67,7 +68,7 @@ set tags=tags,./tags;/
 " Don't redraw while executing macros
 set lazyredraw
 
-" Trying a leader mapping
+" Space leader
 map <Space> <Leader>
 
 " Cscope
@@ -75,9 +76,15 @@ if has('cscope')
     set cscopeverbose
     set cscopequickfix=s-,c-,d-,i-,t-,e-
     if filereadable("cscope.out")
-        cs add cscope.out
+        silent cs add cscope.out
     endif
 endif
+
+" Match angle brackets for cpp files
+augroup angle_bracket
+    autocmd!
+    autocmd FileType cpp setl matchpairs+=<:>
+augroup END
 
 
 """" PLUGINS
@@ -148,14 +155,17 @@ Plug 'vim-scripts/ViewPort', { 'on' : 'Vpedit' }
 Plug 'mhinz/vim-startify'
 Plug 'mpendse/vim-interestingwords'
 Plug 'whatyouhide/vim-gotham'
-Plug 'tpope/vim-vinegar'
+" Plug 'tpope/vim-vinegar'
+Plug 'jeetsukumaran/vim-filebeagle'
 Plug 'haya14busa/incsearch.vim'
 Plug 'junegunn/fzf', { 'dir' : '~/.fzf', 'do': './install', 'on' : 'FZF' }
+Plug 'ajh17/Spacegray.vim'
 " Plug 'vasconcelloslf/vim-interestingwords'
 " Plug 'tpope/vim-dispatch'
 " Plug 'gregsexton/gitv'
 Plug 'SirVer/ultisnips'
 Plug 'honza/vim-snippets'
+Plug 'tpope/vim-capslock'
 " Plug 'Shougo/neocomplete.vim'   " Requires Vim 7.3.885+ and Lua enabled.
 " Plug 'kien/ctrlp.vim'
 " Plug 'LaTeX-Box-Team/LaTeX-Box'
@@ -270,6 +280,9 @@ call unite#custom_source('file_rec,file_rec/async,file_mru,file,buffer,grep',
       \ 'tags',
       \ ], '\|'))
 
+" use fuzzy matcher for line
+call unite#custom#source('line', 'matchers', 'matcher_fuzzy')
+
 " Custom mappings for the unite buffer
 augroup unite
     autocmd!
@@ -304,15 +317,15 @@ nmap f <Plug>Sneak_f
 nmap F <Plug>Sneak_F
 xmap f <Plug>Sneak_f
 xmap F <Plug>Sneak_F
-omap f <Plug>Sneak_f
-omap F <Plug>Sneak_F
+" omap f <Plug>Sneak_f
+" omap F <Plug>Sneak_F
 
 nmap t <Plug>Sneak_t
 nmap T <Plug>Sneak_T
 xmap t <Plug>Sneak_t
 xmap T <Plug>Sneak_T
-omap t <Plug>Sneak_t
-omap T <Plug>Sneak_T
+" omap t <Plug>Sneak_t
+" omap T <Plug>Sneak_T
 
 " Clever S mode
 let g:sneak#s_next = 1
@@ -369,6 +382,10 @@ nnoremap <silent> <Leader>C :call UncolorAllWords()<CR>
 map /  <Plug>(incsearch-forward)
 map ?  <Plug>(incsearch-backward)
 map g/ <Plug>(incsearch-stay)
+
+" Trying out vim-filebeagle (instead of irritating netrw buffers)
+let g:filebeagle_suppress_keymaps = 1
+map <silent> - <Plug>FileBeagleOpenCurrentBufferDir
 
 """" MAPPINGS
 
@@ -504,6 +521,10 @@ nnoremap <silent> ]<Space> :set paste<CR>m`o<Esc>``:set nopaste<CR>
 " Don't move on *
 nnoremap <silent> * :let stay_star_view = winsaveview()<CR>*:call winrestview(stay_star_view)<CR>
 
+" :cq quits vim without throwing a 'files changed' error (equivalent to
+" :qall!). Unfortunately, :cw opens the quickfix list and I suck at typing. Shutting up cq.
+cnoreabbrev cq <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? '' : 'cq')<CR>
+
 """ AUTOCOMMANDS
 " (that don't fit into any above categories)
 
@@ -511,11 +532,8 @@ if v:version >= 704
     " Switching between hybrid numbering and absolute numbering mode
     augroup numbering
         autocmd!
-        autocmd VimEnter * set relativenumber number
-        autocmd WinEnter,FocusGained * set relativenumber number
-        autocmd WinLeave,FocusLost * set relativenumber!
-        autocmd InsertEnter * set relativenumber!
-        autocmd InsertLeave * set relativenumber number
+        autocmd InsertLeave,VimEnter,WinEnter,FocusGained * set relativenumber number
+        autocmd InsertEnter,WinLeave,FocusLost * set relativenumber!
     augroup END
 endif
 

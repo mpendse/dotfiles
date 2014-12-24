@@ -1,0 +1,5 @@
+load ~/.irssi/modules/libxmpp_core.so
+load ~/.irssi/modules/libfe_xmpp.so
+format -delete awl_display_header
+format awl_separator │
+/autoaway 120

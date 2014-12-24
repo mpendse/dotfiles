@@ -14,9 +14,10 @@ alias gvimr='\gvim --remote'
 alias gvim='nohup gvim > /dev/null 2>&1'
 alias retag='ctags -R --exclude=build --exclude=.git --exclude=log --exclude=.swp *'
 # Here lies horrible quoting
-alias rescope='find $PWD -name '\''*.cpp'\'' -o -name '\''*.h'\'' -o -name '\''*.c'\'' -o -name '\''*.cxx'\'' -o -name '\''*.hxx'\'' > cscope.files && cscope -b'
+alias rescope='find $PWD -name '\''build'\'' -prune -o -name '\''.git'\'' -prune -o -name '\''bin'\'' -prune -o -name '\''*.cpp'\'' -print -o -name '\''*.h'\'' -print -o -name '\''*.c'\'' -print -o -name '\''*.cxx'\'' -print -o -name '\''*.hxx'\'' -print > cscope.files && cscope -b'
 alias die=try_die_try_again
 alias lock='gnome-screensaver-command -l'
+alias puptime='ps -o pid,comm,lstart,etime,time,args --pid'
 
 # vi mode
 set -o vi
