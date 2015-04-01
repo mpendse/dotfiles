@@ -3,3 +3,4 @@ load ~/.irssi/modules/libfe_xmpp.so
 format -delete awl_display_header
 format awl_separator │
 /autoaway 120
+/STATUSBAR WINDOW ADD -before barend -alignment right xmpp_composing

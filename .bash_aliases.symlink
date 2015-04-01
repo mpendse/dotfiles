@@ -6,7 +6,7 @@ alias lsd='ls -d */'
 alias tmux='tmux -2'
 alias :q=quit_vim_style
 alias ack='ack-grep'
-alias soap='source activate py3k'
+alias soa='source activate'
 alias sod='source deactivate'
 alias rm='rm -I'
 alias gvims='\gvim --servername GVIM'
@@ -56,4 +56,9 @@ try_die_try_again ()
     if [ $jobs -eq 2 ]; then
         kill -9 $1
     fi
+}
+
+set_window_title() 
+{
+    echo -ne "\e]2;$*\a"
 }

@@ -9,6 +9,11 @@ BLUE=$(tput setaf 4)         # Blue
 MAGENTA=$(tput setaf 5)       # Purple
 CYAN=$(tput setaf 6)         # Cyan
 WHITE=$(tput setaf 7)        # White
+LBLUE=$(tput setaf 12)       # Light Blue
+NRED=$(tput setaf 9)         # 'New' Red
+BrYELLOW=$(tput setaf 11)     # Bright Yellow
+BrGREEN=$(tput setaf 10)     # Bright Green
+ORANGE=$(tput setaf 202)
 
 # Bold
 BOLD=$(tput bold)

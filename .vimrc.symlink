@@ -1,8 +1,5 @@
 """" BASIC OPTIONS 
 
-" Nocompatible
-set nocompatible
-
 " Line numbers
 set nu
 
@@ -29,6 +26,9 @@ syntax on
 " 4 column tabs
 set ts=4
 set sw=4
+" softtabstop - causes backspace to delete the correct number of spaces
+" in insert mode
+set sts=4 
 set expandtab
 
 " Fed up of folding
@@ -76,7 +76,12 @@ if has('cscope')
     set cscopeverbose
     set cscopequickfix=s-,c-,d-,i-,t-,e-
     if filereadable("cscope.out")
-        silent cs add cscope.out
+        " Try catch block because this fails if the database is already added
+        try
+            silent cs add cscope.out
+        catch
+            " Do nothing
+        endtry
     endif
 endif
 
@@ -166,6 +171,11 @@ Plug 'ajh17/Spacegray.vim'
 Plug 'SirVer/ultisnips'
 Plug 'honza/vim-snippets'
 Plug 'tpope/vim-capslock'
+Plug 'nelstrom/vim-qargs', {'on' : 'Qargs'}
+Plug 'w0ng/vim-hybrid'
+Plug 'jiangmiao/auto-pairs'
+Plug 'ludovicchabant/vim-gutentags'
+Plug 'mpendse/unite-search-history'
 " Plug 'Shougo/neocomplete.vim'   " Requires Vim 7.3.885+ and Lua enabled.
 " Plug 'kien/ctrlp.vim'
 " Plug 'LaTeX-Box-Team/LaTeX-Box'
@@ -270,6 +280,9 @@ nnoremap <Leader>s :<C-u>Unite -start-insert -custom-grep-search-word-highlight=
 " Search for text in current buffer
 nnoremap <Leader>l :<C-u>Unite -start-insert -buffer-name=line line<CR>
 
+" Search history
+nnoremap q/ :<C-u>Unite -start-insert -buffer-name=search_history search_history<CR>
+
 " Set up some custom ignores
 call unite#custom_source('file_rec,file_rec/async,file_mru,file,buffer,grep',
       \ 'ignore_pattern', join([
@@ -288,6 +301,7 @@ augroup unite
     autocmd!
     autocmd FileType unite call s:unite_settings()
 augroup END
+
 function! s:unite_settings()
     " Play nice with supertab
     let b:SuperTabDisabled=1
@@ -311,7 +325,6 @@ endif
 " Gundo
 nnoremap <Leader>u :GundoToggle<CR>
 
-" Trying some sneak settings
 " Hijacking f and t to call sneak
 nmap f <Plug>Sneak_f
 nmap F <Plug>Sneak_F
@@ -378,14 +391,25 @@ let g:interestingWordsRandomiseColors = 1
 nnoremap <silent> <Leader>c :call InterestingWords()<CR>
 nnoremap <silent> <Leader>C :call UncolorAllWords()<CR>
 
-" Trying out improved incsearch
+" Improved incsearch settings
 map /  <Plug>(incsearch-forward)
 map ?  <Plug>(incsearch-backward)
-map g/ <Plug>(incsearch-stay)
+" Sometimes I prefer the low tech search
+noremap g/ /
+noremap g? ?
 
-" Trying out vim-filebeagle (instead of irritating netrw buffers)
+" vim-filebeagle (instead of irritating netrw buffers)
 let g:filebeagle_suppress_keymaps = 1
 map <silent> - <Plug>FileBeagleOpenCurrentBufferDir
+
+" auto-pairs
+" only enable for curly braces 
+let g:AutoPairs  = { '{':'}' }
+
+" Trying out vim-gutentags : seamless tag management
+let g:gutentags_project_root = ['.git']
+let g:gutentags_exclude = [ 'build', '.git', '.swp', 'log' ]
+let g:gutentags_generate_on_missing = 0     " Don't generate tags if none exist
 
 """" MAPPINGS
 
@@ -431,7 +455,9 @@ nnoremap q: <nop>
 xnoremap @q :normal @q<CR>
 
 " Repeat last command for each line of a visual selection
-xnoremap . :normal .<CR>
+" This breaks the n . (next match and repeat) workflow (<op-pending>gn should 
+" still work I think)
+" xnoremap . :normal .<CR>
 
 " Map [[ to [{ for cpp files because it is easier to move to parent block
 augroup cpp_parent_block
@@ -453,6 +479,8 @@ nnoremap <silent> ]q :cnext<CR>
 nnoremap <silent> [q :cprevious<CR>
 
 inoremap jj <Esc>
+inoremap jk <Esc>
+inoremap kj <Esc>
 
 " Moving around splits
 nnoremap <C-h> <C-w>h
@@ -524,6 +552,9 @@ nnoremap <silent> * :let stay_star_view = winsaveview()<CR>*:call winrestview(st
 " :cq quits vim without throwing a 'files changed' error (equivalent to
 " :qall!). Unfortunately, :cw opens the quickfix list and I suck at typing. Shutting up cq.
 cnoreabbrev cq <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? '' : 'cq')<CR>
+
+" Expands %% to current file's directory in command-line mode
+cnoremap %% <C-R>=fnameescape(expand('%:h')).'/'<CR>
 
 """ AUTOCOMMANDS
 " (that don't fit into any above categories)
@@ -665,6 +696,34 @@ endfunction
 
 command! -nargs=* -complete=file Ack call Ack(<q-args>)
 
+function! JumpOnePage(forward)
+    let l:currentfile = expand('%:p')
+    while l:currentfile ==# expand('%:p')
+        try
+            let l:originalPosition = join(getpos("."), ":")
+
+            " the addition of the count makes it work somehow instead of just
+            " calling <C-i>.
+            execute 'normal!' 1 . (a:forward ? "\<C-i>" : "\<C-o>")
+
+            " if the position is the same after a successful jump then assume
+            " the end of the jumplist has been reached
+            if l:currentfile ==# expand('%:p')
+                if l:originalPosition ==# join(getpos("."), ":")
+                    break
+                endif
+            endif
+        catch /^Vim\%((\a\+)\)\=:/
+            " A Vim error occurs when there's an invalid jump position.
+            echom "wtf"
+            break
+        endtry
+    endwhile
+endfunction
+
+nnoremap <silent> <C-p> :call JumpOnePage(0)<CR>
+nnoremap <silent> <C-n> :call JumpOnePage(1)<CR>
+
 """" COLORSCHEMES
 
 " 256 terminal colours
@@ -676,8 +735,9 @@ command! -nargs=* -complete=file Ack call Ack(<q-args>)
 " colo random
 " colo anotherdark
 set bg=dark
-let g:solarized_termcolors=256
-colo solarized
+" let g:solarized_termcolors=256
+colo Tomorrow-Night-Eighties
+let g:airline_theme='tomorrow'
 " let g:zenburn_high_Contrast = 1
 " colo zenburn
 " colo wombat256
