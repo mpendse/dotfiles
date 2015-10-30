@@ -13,3 +13,5 @@
 	ui = auto
 [include]
 	path = .gitconfig.local
+[push]
+	default = current

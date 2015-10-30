@@ -69,7 +69,7 @@ set tags=tags,./tags;/
 set lazyredraw
 
 " Space leader
-map <Space> <Leader>
+let mapleader="\<Space>"
 
 " Cscope
 if has('cscope')
@@ -125,7 +125,7 @@ call plug#begin('~/.vim/bundle')
 
 " Bundles
 if v:version >= 704
-    Plug 'Valloric/YouCompleteMe', { 'do' : './install.sh --clang-completer' }
+    Plug 'Valloric/YouCompleteMe', { 'tag' : '66dcc9581c7d237f4d839389bee055df6788fbc9', 'do' : './install.sh --clang-completer' }
 else
     " Plug 'Shougo/neocomplcache.vim'
 endif
@@ -176,6 +176,8 @@ Plug 'w0ng/vim-hybrid'
 Plug 'jiangmiao/auto-pairs'
 Plug 'ludovicchabant/vim-gutentags'
 Plug 'mpendse/unite-search-history'
+Plug 'junegunn/vim-easy-align', {'on' : 'EasyAlign'}
+" Plug 'ivanov/vim-ipython', {'for' : 'python'}
 " Plug 'Shougo/neocomplete.vim'   " Requires Vim 7.3.885+ and Lua enabled.
 " Plug 'kien/ctrlp.vim'
 " Plug 'LaTeX-Box-Team/LaTeX-Box'
@@ -554,7 +556,11 @@ nnoremap <silent> * :let stay_star_view = winsaveview()<CR>*:call winrestview(st
 cnoreabbrev cq <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? '' : 'cq')<CR>
 
 " Expands %% to current file's directory in command-line mode
-cnoremap %% <C-R>=fnameescape(expand('%:h')).'/'<CR>
+cnoremap %% <C-R>=fnameescape(expand('%:p:h')).'/'<CR>
+
+" Some readline bindings
+inoremap <C-a> <Esc>I
+inoremap <C-e> <Esc>A
 
 """ AUTOCOMMANDS
 " (that don't fit into any above categories)
@@ -736,7 +742,7 @@ nnoremap <silent> <C-n> :call JumpOnePage(1)<CR>
 " colo anotherdark
 set bg=dark
 " let g:solarized_termcolors=256
-colo Tomorrow-Night-Eighties
+colo Tomorrow-Night-Bright
 let g:airline_theme='tomorrow'
 " let g:zenburn_high_Contrast = 1
 " colo zenburn
