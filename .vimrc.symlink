@@ -125,7 +125,7 @@ call plug#begin('~/.vim/bundle')
 
 " Bundles
 if v:version >= 704
-    Plug 'Valloric/YouCompleteMe', { 'tag' : '66dcc9581c7d237f4d839389bee055df6788fbc9', 'do' : './install.sh --clang-completer' }
+    Plug 'Valloric/YouCompleteMe', { 'do' : './install.sh --clang-completer' }
 else
     " Plug 'Shougo/neocomplcache.vim'
 endif
