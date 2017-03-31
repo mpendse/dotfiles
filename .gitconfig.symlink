@@ -5,13 +5,17 @@
 	br = branch
 	di = difftool
 	lg = log --graph --color --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+	unmod = "!f() { git checkout -- $(git ls-files --mod); }; f"
 [diff]
 	tool = vimdiff
 [core]
 	editor = vim
+	pager = less -+$LESS -FRS
 [color]
 	ui = auto
 [include]
 	path = .gitconfig.local
 [push]
 	default = current
+[merge]
+	conflictstyle = diff3

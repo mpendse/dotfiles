@@ -12,13 +12,14 @@ alias rm='rm -I'
 alias gvims='\gvim --servername GVIM'
 alias gvimr='\gvim --remote'
 alias gvim='nohup gvim > /dev/null 2>&1'
-alias retag='ctags -R --exclude=build --exclude=.git --exclude=log --exclude=.swp *'
+alias retag='ctags -R --exclude=build --exclude=bin --exclude=.git --exclude=log --exclude=.swp *'
 # Here lies horrible quoting
 alias rescope='find $PWD -name '\''build'\'' -prune -o -name '\''.git'\'' -prune -o -name '\''bin'\'' -prune -o -name '\''*.cpp'\'' -print -o -name '\''*.h'\'' -print -o -name '\''*.c'\'' -print -o -name '\''*.cxx'\'' -print -o -name '\''*.hxx'\'' -print > cscope.files && cscope -b'
 alias die=try_die_try_again
 alias lock='gnome-screensaver-command -l'
 alias puptime='ps -o pid,comm,lstart,etime,time,args --pid'
-alias open='gnome-open'
+alias open='xdg-open'
+alias ssh='ssh -X'
 
 git-remote-merged ()
 {
@@ -49,12 +50,12 @@ shopt -s histappend
 HISTCONTROL=ignoredups
 HISTFILESIZE=1000
 HISTSIZE=1000
-HISTIGNORE='ls*:bg:fg:history:ll:pwd:exit:clear'
+HISTIGNORE='bg:fg:history:ll:pwd:exit:clear'
 # Store history immediately
 export PROMPT_COMMAND="${PROMPT_COMMAND} history -a;"
 
 # git and coloured prompt
-source ~/.git-prompt.sh
+# source ~/.git-prompt.sh
 source ~/.bash-prompt.sh
 
 quit_vim_style () 

@@ -58,8 +58,8 @@ __jobs_count()
 
 __hostname()
 {
-    if [ $HOSTNAME != "of2-dev-l006" ]; then
-        printf "@$HOSTNAME";
+    if [ $HOSTNAME != "cof-dev-l026" ]; then
+        printf "$HOSTNAME:";
     fi
 }
 
@@ -71,23 +71,42 @@ __newline()
     fi
 }
 
+# Runs the base16-shell script to allow colors beyond 15
+BASE16_SHELL="$HOME/.config/base16-shell/scripts/base16-default-dark.sh"
+[[ -s $BASE16_SHELL ]] && source $BASE16_SHELL
+
+# export PS1='\[${RED}\]$(__jobs_count)\[${NORMAL}\]\
+# \u\[${BLUE}\]$(__hostname)\[${NORMAL}\]:\
+# $(
+# if [ $(__git_ps1)x != "x" ]; then
+# 	# Working directory is part of a git repo
+# 	printf "\[${BOLD}\]\[${YELLOW}\]$(__short_pwd)$(
+# 	echo `git status` | egrep "nothing( added)* to commit" > /dev/null 2>&1;
+# 	if [ "$?" -eq "0" ]; then
+# 		# No changes to working tree
+# 		printf "\[${GREEN}\]$(__git_ps1 "(%s)")";
+# 	else
+# 		# Changes to working tree
+# 		printf "\[${RED}\]$(__git_ps1 "{%s}")";
+# 	fi
+# 	)\[${NORMAL}\] ";
+# else
+# 	# Not in git repo
+# 	printf "\[${YELLOW}\]$(__short_pwd)\[${NORMAL}\] ";
+# fi
+# )$(__newline)\$ '
+
+source ~/Downloads/bash-it/themes/powerline/powerline-stripped.bash
+
+PROMPT_COMMAND="${PROMPT_COMMAND} powerline_scm_prompt;"
+
+__scm_prompt()
+{
+    echo -e ${SCM_PROMPT}
+}
+
+# export PS1='\[${RED}\]$(__jobs_count)\[${NORMAL}\]\
+# \u\[${BLUE}\]$(__hostname)\[${NORMAL}\]:\[${YELLOW}\]$(__short_pwd)\[${NORMAL}\]${SCM_PROMPT}$(__newline)\$ '
+
 export PS1='\[${RED}\]$(__jobs_count)\[${NORMAL}\]\
-\u\[${BLUE}\]$(__hostname)\[${NORMAL}\]:\
-$(
-if [ $(__git_ps1)x != "x" ]; then
-	# Working directory is part of a git repo
-	printf "\[${BOLD}\]\[${YELLOW}\]$(__short_pwd)$(
-	echo `git status` | egrep "nothing( added)* to commit" > /dev/null 2>&1;
-	if [ "$?" -eq "0" ]; then
-		# No changes to working tree
-		printf "\[${GREEN}\]$(__git_ps1 "(%s)")";
-	else
-		# Changes to working tree
-		printf "\[${RED}\]$(__git_ps1 "{%s}")";
-	fi
-	)\[${NORMAL}\] ";
-else
-	# Not in git repo
-	printf "\[${YELLOW}\]$(__short_pwd)\[${NORMAL}\] ";
-fi
-)$(__newline)\$ '
+\[${BLUE}\]$(__hostname)\[${NORMAL}\]${CWD_PROMPT}$(__short_pwd)\[${NORMAL}\]$(__scm_prompt)$(__newline)\$ '

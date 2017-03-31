@@ -129,8 +129,7 @@ if v:version >= 704
     Plug 'Valloric/YouCompleteMe', { 'do' : './install.sh --clang-completer' , 'for' : ['cpp', 'python'] }
     autocmd! User YouCompleteMe if !has('vim_starting') | call youcompleteme#Enable() | endif
 else
-    " basic textual tab-completion
-    Plug 'ajh17/VimCompletesMe'
+    " Plug 'Shougo/neocomplcache.vim'
 endif
 Plug 'tpope/vim-commentary'
 Plug 'bling/vim-airline'
@@ -179,9 +178,7 @@ Plug 'tpope/vim-capslock'
 Plug 'nelstrom/vim-qargs', {'on' : 'Qargs'}
 Plug 'w0ng/vim-hybrid'
 Plug 'jiangmiao/auto-pairs'
-if v:version >= 704
-    Plug 'ludovicchabant/vim-gutentags'
-endif
+Plug 'ludovicchabant/vim-gutentags'
 Plug 'mpendse/unite-search-history'
 Plug 'junegunn/vim-easy-align', {'on' : 'EasyAlign'}
 " Trying out vim-rsi, readline bindings for insert and command mode
@@ -406,7 +403,7 @@ let g:startify_custom_header = [
             \ '',
             \ '                         VIM - Vi IMproved                       ',
             \ '                                                                 ',
-            \ '                            version 8.0                          ',
+            \ '                            version 7.4                          ',
             \ '                     by Bram Moolenaar et al.                    ',
             \ '            Vim is open source and freely distributable          ',
             \ '',
@@ -553,6 +550,14 @@ nnoremap <C-h> <C-w>h
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
+
+" Nvim mappings for moving from/to terminal window
+if has("nvim")
+    tnoremap <c-h> <c-\><c-n><c-w>h
+    tnoremap <c-j> <C-\><C-n><C-w>j
+    tnoremap <c-k> <C-\><C-n><C-w>k
+    tnoremap <c-l> <C-\><C-n><C-w>l
+endif
 
 " Search for selected text, forwards or backwards.
 vnoremap <silent> * :<C-U>
@@ -710,7 +715,12 @@ function! BuildInSubDir(buildsubdir)
     " toplevel project dir) 
     let toplevelpath = FindTopLevelProjectDir()
     let builddir = toplevelpath . a:buildsubdir
-    :execute 'make -j16 -C ' . builddir
+    let cmd = 'make -j16 -C' . builddir
+    if has("nvim")
+        :belowright new | call termopen(cmd) | startinsert
+    else
+        :execute cmd
+    endif
     cw
 endfunction
 

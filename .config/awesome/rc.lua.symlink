@@ -13,6 +13,18 @@ require("debian.menu")
 -- Widgets
 vicious = require("vicious")
 
+-- Override awesome.quit when we're using Awesome under GNOME
+-- Quitting awesome when under gnome will call gnome-session-quit instead
+_awesome_quit = awesome.quit
+awesome.quit = function()
+    if os.getenv("DESKTOP_SESSION") == "awesome-gnome" then
+       os.execute("/usr/bin/gnome-session-quit") -- for Ubuntu 14.04
+       os.execute("pkill -9 gnome-session") -- I use this on Ubuntu 16.04
+    else
+    _awesome_quit()
+    end
+end
+
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
 -- another config (This code will only ever execute for the fallback config)
@@ -43,7 +55,7 @@ end
 beautiful.init(awful.util.getdir("config") .. "/themes/default/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
-terminal = "terminator"
+terminal = "urxvt"
 editor = os.getenv("EDITOR") or "vim"
 editor_cmd = terminal .. " -e " .. editor
 
@@ -252,9 +264,9 @@ globalkeys = awful.util.table.join(
     awful.key({ modkey, "Shift"   }, "space", function () awful.layout.inc(layouts, -1) end),
 
     awful.key({ modkey, "Control" }, "n", awful.client.restore),
-    awful.key({ modkey,           }, "F1",    function () awful.screen.focus(3) end),
-    awful.key({ modkey,           }, "F2",    function () awful.screen.focus(1) end),
-    awful.key({ modkey,           }, "F3",    function () awful.screen.focus(2) end),
+    awful.key({ modkey,           }, "F1",    function () awful.screen.focus(1) end),
+    awful.key({ modkey,           }, "F2",    function () awful.screen.focus(2) end),
+    awful.key({ modkey,           }, "F3",    function () awful.screen.focus(3) end),
 
     -- Prompt
     awful.key({ modkey },            "r",     function () mypromptbox[mouse.screen]:run() end),
@@ -340,12 +352,16 @@ root.keys(globalkeys)
 -- {{{ Rules
 awful.rules.rules = {
     -- All clients will match this rule.
+    -- size_hints_honor = false will make clients fill the small gaps that are 
+    -- sometimes left behind. There is a known issue with urxvt transparency setting and 
+    -- this flag however, so remove it if you find the transparency issue annoying
     { rule = { },
       properties = { border_width = beautiful.border_width,
                      border_color = beautiful.border_normal,
                      focus = true,
                      keys = clientkeys,
-                     buttons = clientbuttons } },
+                     buttons = clientbuttons,
+                     size_hints_honor = false } },
     { rule = { class = "MPlayer" },
       properties = { floating = true } },
     { rule = { class = "pinentry" },
