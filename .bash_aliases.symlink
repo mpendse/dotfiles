@@ -20,6 +20,12 @@ alias lock='gnome-screensaver-command -l'
 alias puptime='ps -o pid,comm,lstart,etime,time,args --pid'
 alias open='xdg-open'
 alias ssh='ssh -X'
+# TMUX only supports TERM=screen or TERM=screen-256color
+[ -n "$TMUX" ] && export TERM=screen-256color
+
+g() { git $@; }
+
+t() { tig $@; }
 
 git-remote-merged ()
 {

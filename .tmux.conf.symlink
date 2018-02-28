@@ -1,9 +1,23 @@
 # Remap prefix to Control + a
-set -g prefix C-a
+# Trying C-c as a prefix
+set -g prefix C-c
 unbind C-b
-bind C-a send-prefix
+bind C-c send-prefix
 
 # set -g mode-mouse on
 set -g mouse-resize-pane on
 set -g mouse-select-pane on
 set -g mouse-select-window on
+set -g default-terminal "screen-256color"
+
+# vim like navigation
+bind -r k select-pane -U
+bind -r j select-pane -D
+bind -r h select-pane -L
+bind -r l select-pane -R
+
+# split vertically with prefix v
+bind-key v split-window -h
+
+set -g status-bg colour235
+set -g status-fg white

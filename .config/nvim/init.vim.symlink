@@ -91,6 +91,20 @@ augroup angle_bracket
     autocmd FileType cpp setl matchpairs+=<:>
 augroup END
 
+if exists('+breakindent')
+  set breakindent " preserves the indent level of wrapped lines
+  set showbreak=↪ " illustrate wrapped lines
+endif
+
+if v:version > 703 || v:version == 703 && has("patch541")
+  set formatoptions+=j " Delete comment character when joining commented lines
+endif
+
+if has("nvim")
+    " Trying out inccommand in nvim, it shows the result of a substitution
+    " command as I type it.
+    set inccommand=nosplit
+endif
 
 """" PLUGINS
 
@@ -145,7 +159,7 @@ Plug 'Shougo/unite.vim'
 Plug 'Shougo/vimproc.vim', { 'do' : function('BuildVimProc') }
 Plug 'Shougo/neomru.vim'
 " Plug 'terryma/vim-smooth-scroll'
-Plug 'tpope/vim-abolish'
+Plug 'tpope/tpope-vim-abolish'
 Plug 'octol/vim-cpp-enhanced-highlight', { 'for' : 'cpp' }
 Plug 'tpope/vim-surround'
 Plug 'tsukkee/unite-tag'
@@ -178,13 +192,11 @@ Plug 'tpope/vim-capslock'
 Plug 'nelstrom/vim-qargs', {'on' : 'Qargs'}
 Plug 'w0ng/vim-hybrid'
 Plug 'jiangmiao/auto-pairs'
-Plug 'ludovicchabant/vim-gutentags'
+if v:version >= 704
+    Plug 'ludovicchabant/vim-gutentags'
+endif
 Plug 'mpendse/unite-search-history'
 Plug 'junegunn/vim-easy-align', {'on' : 'EasyAlign'}
-" Trying out vim-rsi, readline bindings for insert and command mode
-" Disabling meta mappings for vim-rsi because I don't know how it 
-" interacts with the meta mappings for Awesome WM
-let g:rsi_no_meta = 1
 Plug 'tpope/vim-rsi'
 " Yank history source for unite has been separated from unite
 Plug 'Shougo/neoyank.vim'
@@ -403,7 +415,7 @@ let g:startify_custom_header = [
             \ '',
             \ '                         VIM - Vi IMproved                       ',
             \ '                                                                 ',
-            \ '                            version 7.4                          ',
+            \ '                            version 8.0                          ',
             \ '                     by Bram Moolenaar et al.                    ',
             \ '            Vim is open source and freely distributable          ',
             \ '',
@@ -433,8 +445,16 @@ let g:AutoPairs  = { '{':'}' }
 
 " Trying out vim-gutentags : seamless tag management
 let g:gutentags_project_root = ['.git']
-let g:gutentags_exclude = [ 'build', '.git', '.swp', 'log', 'bin' ]
+let g:gutentags_ctags_exclude = [ 'build', '.git', '.swp', 'log', 'bin' ]
 let g:gutentags_generate_on_missing = 0     " Don't generate tags if none exist
+
+" Some abolish abbreviations
+if exists(":Abolish")
+    Abolish icnlud{e,ing} includ{}
+    Abolish isnt{ant,ance,antiate} inst{}
+    Abolish u{8,16,32,64} uint{}_t
+    Abolish i{8,16,32,64} int{}_t
+endif
 
 " Trying out lightline
 " set showtabline=2
@@ -635,6 +655,10 @@ cnoremap %% <C-R>=fnameescape(expand('%:p:h')).'/'<CR>
 " Clang Format integration
 map <F3> :py3f ~/Downloads/clang-format.py<CR>
 
+" :p will close current buffer, and bring previous buffer to current
+" window, without closing any window.
+cnoreabbrev p <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'b#\|bd!#' : 'p')<CR>
+
 """ AUTOCOMMANDS
 " (that don't fit into any above categories)
 
@@ -726,7 +750,7 @@ endfunction
 
 function! FindTopLevelProjectDir()
     " Searches for a .git directory upward till root.
-    let isittopdir = finddir('.git') 
+    let isittopdir = finddir('.git')
     if isittopdir ==? ".git"
         return getcwd() . '/'
     endif
@@ -777,7 +801,9 @@ nnoremap <silent> <F5> :call ClangCheck("build/gcc-debug")<CR>
 function! Ack(args)
     let efm_bak = &efm
     set efm=%f:%l:%m
-    let cmd = "ack-grep --nocolor --nogroup --ignore-dir=build " . a:args
+    " Trying out ag instead
+    let cmd = "ag --nocolor --nogroup --ignore-dir=build " . a:args
+    " let cmd = "ack-grep --nocolor --nogroup --ignore-dir=build " . a:args
     cexpr system(cmd)
     let &efm = efm_bak
     copen
@@ -850,8 +876,11 @@ endif
 """" STUFF FROM SENSIBLE.VIM
 
 if &listchars ==# 'eol:$'
-    set listchars=tab:>\ ,trail:-,extends:>,precedes:<,nbsp:+
+    set listchars=tab:▸\ ,trail:¬,extends:>,precedes:<,nbsp:+
 endif
+
+" testing out list on by default
+set list
 
 if &history < 1000
     set history=1000

@@ -19,3 +19,5 @@
 	default = current
 [merge]
 	conflictstyle = diff3
+[commit]
+	verbose = true
