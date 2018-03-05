@@ -1,4 +1,4 @@
-"""" BASIC OPTIONS 
+"""" BASIC OPTIONS
 
 " Line numbers
 set nu
@@ -28,7 +28,7 @@ set ts=4
 set sw=4
 " softtabstop - causes backspace to delete the correct number of spaces
 " in insert mode
-set sts=4 
+set sts=4
 set expandtab
 
 " Fed up of folding
@@ -106,6 +106,32 @@ if has("nvim")
     set inccommand=nosplit
 endif
 
+"""" STATUSLINE
+
+function! GetBranch()
+    let br = fugitive#head(8)
+    if br ==# ''
+        return ''
+    else
+        return '[' . br . ']'
+    endif
+endfunction
+
+set statusline=
+set statusline+=%<  " cut at start
+set statusline=[%{GetHostname()}]
+set statusline+=%{GetBranch()}
+set statusline+=[%-0.40f]
+" File flags
+set statusline+=%m%h%w%q%r\ 
+" Right side
+set statusline+=%=
+set statusline+=%y
+" set statusline+=[%{(&fenc!=''?&fenc:&enc)}]
+set statusline+=[%p%%]
+" set statusline+=[%l\/%L\]
+set statusline+=[%c]
+
 """" PLUGINS
 
 if empty(glob('~/.vim/autoload/plug.vim'))
@@ -147,7 +173,7 @@ else
     Plug 'ajh17/VimCompletesMe'
 endif
 Plug 'tpope/vim-commentary'
-Plug 'bling/vim-airline'
+" Plug 'bling/vim-airline'
 Plug 'vim-scripts/pythoncomplete', { 'for' : 'python' }
 Plug 'flazz/vim-colorschemes'
 Plug 'ervandew/supertab'
@@ -185,10 +211,11 @@ Plug 'ajh17/Spacegray.vim'
 " Plug 'vasconcelloslf/vim-interestingwords'
 " Plug 'tpope/vim-dispatch'
 " Plug 'gregsexton/gitv'
-if v:version >= 704
-    Plug 'SirVer/ultisnips'
-    Plug 'honza/vim-snippets', { 'for' : ['cpp', 'python'] }
-endif
+" Removing snippets temporarily
+" if v:version >= 704
+"     Plug 'SirVer/ultisnips'
+"     Plug 'honza/vim-snippets', { 'for' : ['cpp', 'python'] }
+" endif
 Plug 'tpope/vim-capslock'
 Plug 'nelstrom/vim-qargs', {'on' : 'Qargs'}
 Plug 'w0ng/vim-hybrid'
@@ -202,13 +229,13 @@ Plug 'tpope/vim-rsi'
 " Yank history source for unite has been separated from unite
 Plug 'Shougo/neoyank.vim'
 " Airline Themes have migrated to separate repo
-Plug 'vim-airline/vim-airline-themes'
+" Plug 'vim-airline/vim-airline-themes'
 " Plug 'bling/vim-bufferline'
 " Plug 'ivanov/vim-ipython', {'for' : 'python'}
-" Plug 'Shougo/neocomplete.vim'   " Requires Vim 7.3.885+ and Lua enabled.
 " Plug 'kien/ctrlp.vim'
 " Plug 'LaTeX-Box-Team/LaTeX-Box'
 " Plug 'vim-scripts/AutoComplPop'
+Plug 'ap/vim-buftabline'
 
 call plug#end()
 
@@ -246,23 +273,23 @@ let g:SuperTabDefaultCompletionType = "<c-n>"
 " let g:tex_flavor='latex'
 
 " Airline settings
-let g:airline_theme='dark'
+" let g:airline_theme='dark'
 
 " Trying out a smaller set of extensions
-let g:airline_extensions = ['branch', 'tabline', 'whitespace', 'capslock']
+" let g:airline_extensions = ['branch', 'tabline', 'whitespace', 'capslock']
 
 " Ignore trailing whitespaces, but look out for mixed indents
-let g:airline#extensions#whitespace#checks = [ 'indent' ]
+" let g:airline#extensions#whitespace#checks = [ 'indent' ]
 
 " Removing separators
-let g:airline_left_sep=''
-let g:airline_right_sep=''
+" let g:airline_left_sep=''
+" let g:airline_right_sep=''
 
 " Enable the list of buffers
-let g:airline#extensions#tabline#enabled = 1
+" let g:airline#extensions#tabline#enabled = 1
 
 " Show buffer numbers
-let g:airline#extensions#tabline#buffer_nr_show = 1
+" let g:airline#extensions#tabline#buffer_nr_show = 1
 
 " Put hostname before filename
 " Autocmd to store it at startup cuz the status line is rendered every time
@@ -273,15 +300,15 @@ augroup HostnameAtStartup
 augroup END
 
 function! GetHostname()
-    return g:my_hostname[:-2] . ' │ '
+    return g:my_hostname[:-2]
 endfunction
 
-function! AirlineInit()
-    call airline#parts#define_function('hostname', 'GetHostname')
-    call airline#parts#define_minwidth('hostname', 80)      " show hostname only if width >= 80
-    let g:airline_section_c = airline#section#create(['hostname', 'file'])
-endfunction
-au VimEnter * call AirlineInit()
+" function! AirlineInit()
+"     call airline#parts#define_function('hostname', 'GetHostname')
+"     call airline#parts#define_minwidth('hostname', 80)      " show hostname only if width >= 80
+"     let g:airline_section_c = airline#section#create(['hostname', 'file'])
+" endfunction
+" au VimEnter * call AirlineInit()
 
 " Unite settings
 " Use fuzzy matcher for everything
@@ -396,9 +423,9 @@ let g:ycm_key_list_previous_completion = ['<C-p>', '<Up>']
 let g:SuperTabDefaultCompletionType = '<C-n>'
 
 " better key bindings for UltiSnipsExpandTrigger
-let g:UltiSnipsExpandTrigger = "<c-j>"
-let g:UltiSnipsJumpForwardTrigger = "<c-n>"
-let g:UltiSnipsJumpBackwardTrigger = "<c-p>"
+" let g:UltiSnipsExpandTrigger = '<c-j>'
+" let g:UltiSnipsJumpForwardTrigger = '<c-n>'
+" let g:UltiSnipsJumpBackwardTrigger = '<c-p>'
 
 " vim-pasta settings
 " Enable the indent-aware-paste only on c and cpp files.
@@ -456,6 +483,12 @@ if exists(":Abolish")
     Abolish u{8,16,32,64} uint{}_t
     Abolish i{8,16,32,64} int{}_t
 endif
+
+" buftabline settings
+let g:buftabline_numbers = 1
+let g:buftabline_indicators = 1
+let g:buftabline_separators = 1
+let g:buftabline_plug_max = 0
 
 " Trying out lightline
 " set showtabline=2
@@ -857,7 +890,7 @@ set bg=dark
 " Use Tomorrow-Night-Bright on any other terminal
 let base16colorspace=256
 colo base16-default-dark
-let g:airline_theme='base16'
+" let g:airline_theme='base16'
 " colo Tomorrow-Night-Bright
 " let g:airline_theme='tomorrow'
 " let g:zenburn_high_Contrast = 1
@@ -933,6 +966,6 @@ if has('gui_running')
     set guioptions-=b
     colo base16-default-dark
     set showtabline=0
-    let g:airline_theme='base16'
+    " let g:airline_theme='base16'
 endif
 

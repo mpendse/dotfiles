@@ -13,7 +13,13 @@ LBLUE=$(tput setaf 12)       # Light Blue
 NRED=$(tput setaf 9)         # 'New' Red
 BrYELLOW=$(tput setaf 11)     # Bright Yellow
 BrGREEN=$(tput setaf 10)     # Bright Green
+BrWHITE=$(tput setaf 15)    # Bright White
 ORANGE=$(tput setaf 202)
+# Greyscale (Black -> White)
+COLOR18=$(tput setaf 18)
+COLOR19=$(tput setaf 19)
+COLOR20=$(tput setaf 20)
+COLOR21=$(tput setaf 21)
 
 # Bold
 BOLD=$(tput bold)
@@ -33,6 +39,11 @@ BBLUE=$(tput setab 4)         # Blue
 BMAGENTA=$(tput setab 5)       # Purple
 BCYAN=$(tput setab 6)         # Cyan
 BWHITE=$(tput setab 7)        # White
+# Greyscale backgrounds (Black -> White)
+BCOLOR18=$(tput setab 18)
+BCOLOR19=$(tput setab 19)
+BCOLOR20=$(tput setab 20)
+BCOLOR21=$(tput setab 21)
 
 # Various variables you might want for your PS1 prompt instead
 Time12h="\T"
@@ -75,38 +86,38 @@ __newline()
 BASE16_SHELL="$HOME/.config/base16-shell/scripts/base16-default-dark.sh"
 [[ -s $BASE16_SHELL ]] && source $BASE16_SHELL
 
-# export PS1='\[${RED}\]$(__jobs_count)\[${NORMAL}\]\
-# \u\[${BLUE}\]$(__hostname)\[${NORMAL}\]:\
-# $(
-# if [ $(__git_ps1)x != "x" ]; then
-# 	# Working directory is part of a git repo
-# 	printf "\[${BOLD}\]\[${YELLOW}\]$(__short_pwd)$(
-# 	echo `git status` | egrep "nothing( added)* to commit" > /dev/null 2>&1;
-# 	if [ "$?" -eq "0" ]; then
-# 		# No changes to working tree
-# 		printf "\[${GREEN}\]$(__git_ps1 "(%s)")";
-# 	else
-# 		# Changes to working tree
-# 		printf "\[${RED}\]$(__git_ps1 "{%s}")";
-# 	fi
-# 	)\[${NORMAL}\] ";
-# else
-# 	# Not in git repo
-# 	printf "\[${YELLOW}\]$(__short_pwd)\[${NORMAL}\] ";
-# fi
-# )$(__newline)\$ '
+export PS1='\[${RED}\]$(__jobs_count)\[${NORMAL}\]\
+\[${BLUE}\]$(__hostname)\[${NORMAL}\]\
+$(
+if [ $(__git_ps1)x != "x" ]; then
+    # Working directory is part of a git repo
+    printf "\[${WHITE}\]$(__short_pwd)$(
+    echo `git status` | egrep "nothing( added)* to commit" > /dev/null 2>&1;
+    if [ "$?" -eq "0" ]; then
+        # No changes to working tree
+        printf "\[${BCOLOR18}\] \[${BrWHITE}\]$(__git_ps1 "%s")✓ ";
+    else
+        # Changes to working tree
+        printf "\[${BCOLOR18}\] \[${ORANGE}\]$(__git_ps1 "%s")✗ ";
+    fi
+    )\[${NORMAL}\]";
+else
+    # Not in git repo
+    printf "\[${WHITE}\]$(__short_pwd)\[${NORMAL}\]";
+fi
+)$(__newline)$ '
 
-source ~/Downloads/bash-it/themes/powerline/powerline-stripped.bash
-
-PROMPT_COMMAND="${PROMPT_COMMAND} powerline_scm_prompt;"
-
-__scm_prompt()
-{
-    echo -e ${SCM_PROMPT}
-}
+# source ~/Downloads/bash-it/themes/powerline/powerline-stripped.bash
+# 
+# PROMPT_COMMAND="${PROMPT_COMMAND} powerline_scm_prompt;"
+# 
+# __scm_prompt()
+# {
+#     echo -e ${SCM_PROMPT}
+# }
 
 # export PS1='\[${RED}\]$(__jobs_count)\[${NORMAL}\]\
 # \u\[${BLUE}\]$(__hostname)\[${NORMAL}\]:\[${YELLOW}\]$(__short_pwd)\[${NORMAL}\]${SCM_PROMPT}$(__newline)\$ '
 
-export PS1='\[${RED}\]$(__jobs_count)\[${NORMAL}\]\
-\[${BLUE}\]$(__hostname)\[${NORMAL}\]${CWD_PROMPT}$(__short_pwd)\[${NORMAL}\]$(__scm_prompt)$(__newline)\$ '
+# export PS1='\[${RED}\]$(__jobs_count)\[${NORMAL}\]\
+# \[${BLUE}\]$(__hostname)\[${NORMAL}\]${CWD_PROMPT}$(__short_pwd)\[${NORMAL}\]$(__scm_prompt)$(__newline)\$ '
