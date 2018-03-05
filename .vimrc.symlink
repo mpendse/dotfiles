@@ -831,14 +831,19 @@ endfunction
 
 nnoremap <silent> <F5> :call ClangCheck("build/gcc-debug")<CR>
 
-" Basic Ack (till I cave and install the plugin)
 function! Ack(args)
     let efm_bak = &efm
     set efm=%f:%l:%m
-    " Trying out ag instead
-    let cmd = "ag --nocolor --nogroup --ignore-dir=build " . a:args
-    " let cmd = "ack-grep --nocolor --nogroup --ignore-dir=build " . a:args
-    cexpr system(cmd)
+    if executable('ag')
+        let cmd = "ag --nocolor --nogroup --ignore-dir=build " . a:args
+        cexpr system(cmd)
+    elseif executable('ack-grep')
+        let cmd = "ack-grep --nocolor --nogroup --ignore-dir=build " . a:args
+        cexpr system(cmd)
+    elseif executable('grep')
+        let cmd = "grep -rn " . a:args
+        cexpr system(cmd)
+    endif
     let &efm = efm_bak
     copen
 endfunction

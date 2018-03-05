@@ -76,7 +76,12 @@ URxvt.url-launcher: google-chrome
 URxvt.matcher.button: 1
 !URxvt.font: xft:Ubuntu Mono derivative Powerline Plus Nerd File Types Mono:size=12:antialias=true
 !URxvt.font: xft:Ubuntu Mono:size=12:antialias=true
-URxvt.font: xft:UbuntuMonoDerivativePowerline Nerd Font:size=12:antialias=true
+!URxvt.font: xft:UbuntuMonoDerivativePowerline Nerd Font:size=12:antialias=true
+URxvt.font: xft:Input:size=11:antialias=true
+!URxvt.font: xft:DejaVu Sans Mono:size=10:antialias=true
+!URxvt.font: xft:Fira Mono for Powerline:pixelsize=14:antialias=true
+!URxvt.font: xft:Fira Mono Medium for Powerline:pixelsize=14:antialias=true
+!URxvt.font: xft:CMU Typewriter Text:size=13:antialias=true
 !URxvt.font: xft:Hack:pixelsize=15:antialias=true
 !URxvt.font: xft:Hack:size=10:antialias=true
 !URxvt.letterSpace: -1
