@@ -1,0 +1,14 @@
+// Add the following at the end of ssb-interop.js with the path to the black.css file.
+
+document.addEventListener('DOMContentLoaded', function() {
+  var fs = require('fs'),
+  filePath = '/Applications/Slack.app/Contents/Resources/black-slack.css';
+
+  fs.readFile(filePath, {encoding: 'utf-8'}, function(err, data) {
+    if (!err) {
+      var css = document.createElement('style')
+      css.innerText = data;
+      document.getElementsByTagName('head')[0].appendChild(css);
+    }
+  })
+});

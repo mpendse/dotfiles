@@ -55,13 +55,13 @@ Jobs="\j"
 
 __short_pwd()
 {
-    MYPATH=$(~/.short_pwd.py "$PWD" 40)
+    local MYPATH=$(~/.short_pwd.py "$PWD" 40)
     printf $MYPATH
 }
 
 __jobs_count()
 {
-    job_count=$(jobs -s | wc -l)
+    local job_count=$(jobs -s | wc -l)
     if [ $job_count -ne 0 ]; then
         printf "[%s] " $job_count
     fi
@@ -76,9 +76,22 @@ __hostname()
 
 __newline()
 {
-    cols=$(tput cols)
+    local cols=$(tput cols)
     if [ $cols -lt 80 ]; then
         printf ' \n '
+    fi
+}
+
+__ahead_behind_indicator()
+{
+    local status=$(awk 'NR==1' <<< "$(git status --porcelain -uno -b 2> /dev/null)")
+    local ahead_re='.+ahead ([0-9]+).+'
+    local behind_re='.+behind ([0-9]+).+'
+    if [[ "${status}" =~ ${ahead_re} ]]; then
+        printf '↑ '
+    fi
+    if [[ "${status}" =~ ${behind_re} ]]; then
+        printf '↓ '
     fi
 }
 
@@ -95,10 +108,10 @@ if [ $(__git_ps1)x != "x" ]; then
     echo `git status` | egrep "nothing( added)* to commit" > /dev/null 2>&1;
     if [ "$?" -eq "0" ]; then
         # No changes to working tree
-        printf "\[${BCOLOR18}\] \[${BrWHITE}\]$(__git_ps1 "%s")✓ ";
+        printf "\[${BCOLOR18}\] \[${BrWHITE}\]$(__ahead_behind_indicator)$(__git_ps1 "%s")✓ ";
     else
         # Changes to working tree
-        printf "\[${BCOLOR18}\] \[${ORANGE}\]$(__git_ps1 "%s")✗ ";
+        printf "\[${BCOLOR18}\] \[${ORANGE}\]$(__ahead_behind_indicator)$(__git_ps1 "%s")✗ ";
     fi
     )\[${NORMAL}\]";
 else

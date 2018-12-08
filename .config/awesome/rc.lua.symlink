@@ -12,6 +12,7 @@ require("debian.menu")
 
 -- Widgets
 vicious = require("vicious")
+-- local spotify_widget = require("spotify-widget.spotify")
 
 -- Override awesome.quit when we're using Awesome under GNOME
 -- Quitting awesome when under gnome will call gnome-session-quit instead
@@ -265,9 +266,9 @@ globalkeys = awful.util.table.join(
     awful.key({ modkey, "Shift"   }, "space", function () awful.layout.inc(layouts, -1) end),
 
     awful.key({ modkey, "Control" }, "n", awful.client.restore),
-    awful.key({ modkey,           }, "F1",    function () awful.screen.focus(1) end),
+    awful.key({ modkey,           }, "F1",    function () awful.screen.focus(3) end),
+    awful.key({ modkey,           }, "F2",    function () awful.screen.focus(1) end),
     awful.key({ modkey,           }, "F3",    function () awful.screen.focus(2) end),
-    awful.key({ modkey,           }, "F2",    function () awful.screen.focus(3) end),
 
     -- Prompt
     awful.key({ modkey },            "r",     function () mypromptbox[mouse.screen]:run() end),

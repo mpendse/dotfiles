@@ -109,28 +109,42 @@ endif
 """" STATUSLINE
 
 function! GetBranch()
-    let br = fugitive#head(8)
-    if br ==# ''
+    let l:br = fugitive#head(8)
+    if l:br ==# ''
         return ''
     else
-        return '[' . br . ']'
+        return '[' . l:br . ']'
+    endif
+endfunction
+
+" Yell if a BOM is detected at the start of the file so it is obvious and we
+" don't accidentally break bash scripts with the BOM character
+function! HasBOM()
+    if &bomb
+        return '[BOM DETECTED]'
+    else
+        return ''
     endif
 endfunction
 
 set statusline=
 set statusline+=%<  " cut at start
-set statusline=[%{GetHostname()}]
+set statusline+=[%{GetHostname()}]
 set statusline+=%{GetBranch()}
 set statusline+=[%-0.40f]
-" File flags
+" File flags (space character at the end is intentional)
 set statusline+=%m%h%w%q%r\ 
 " Right side
 set statusline+=%=
+set statusline+=%#LineNr#
 set statusline+=%y
 " set statusline+=[%{(&fenc!=''?&fenc:&enc)}]
 set statusline+=[%p%%]
 " set statusline+=[%l\/%L\]
 set statusline+=[%c]
+" Adds the value of the 'ff' variable (fileformat) to the statusline
+set statusline+=[%{&ff}]
+set statusline+=%{HasBOM()}
 
 """" PLUGINS
 
@@ -164,7 +178,7 @@ endfunction
 call plug#begin('~/.vim/bundle')
 
 " Bundles
-if v:version >= 704
+if v:version >= 714
     " Plug 'Valloric/YouCompleteMe', { 'commit' : '66dcc9581c7d237f4d839389bee055df6788fbc9', 'do' : './install.sh --clang-completer' , 'for' : ['cpp', 'python'] }
     Plug 'Valloric/YouCompleteMe', { 'do' : './install.sh --clang-completer' , 'for' : ['cpp', 'python'] }
     autocmd! User YouCompleteMe if !has('vim_starting') | call youcompleteme#Enable() | endif
@@ -175,10 +189,8 @@ endif
 Plug 'tpope/vim-commentary'
 " Plug 'bling/vim-airline'
 Plug 'vim-scripts/pythoncomplete', { 'for' : 'python' }
-Plug 'flazz/vim-colorschemes'
 Plug 'ervandew/supertab'
 " Plug 'scrooloose/nerdtree'
-Plug 'altercation/vim-colors-solarized'
 Plug 'tpope/vim-fugitive'
 Plug 'justinmk/vim-sneak'
 Plug 'wellle/targets.vim'
@@ -195,9 +207,6 @@ Plug 'sjl/gundo.vim', { 'on' : 'GundoToggle' }
 Plug 'tpope/vim-obsession'
 Plug 'tpope/vim-eunuch'
 Plug 'tpope/vim-repeat'
-Plug 'sickill/vim-monokai'
-Plug 'jonathanfilip/vim-lucius'
-Plug 'chriskempson/base16-vim'
 Plug 'sickill/vim-pasta'
 Plug 'vim-scripts/ViewPort', { 'on' : 'Vpedit' }
 Plug 'mhinz/vim-startify'
@@ -206,8 +215,9 @@ Plug 'whatyouhide/vim-gotham'
 " Plug 'tpope/vim-vinegar'
 Plug 'jeetsukumaran/vim-filebeagle'
 " Plug 'haya14busa/incsearch.vim'
-Plug 'junegunn/fzf', { 'dir' : '~/.fzf', 'do': './install', 'on' : 'FZF' }
-Plug 'ajh17/Spacegray.vim'
+Plug 'junegunn/fzf', { 'dir' : '~/.fzf', 'do': './install' }
+" Trying out FZF.vim
+Plug 'junegunn/fzf.vim'
 " Plug 'vasconcelloslf/vim-interestingwords'
 " Plug 'tpope/vim-dispatch'
 " Plug 'gregsexton/gitv'
@@ -218,7 +228,6 @@ Plug 'ajh17/Spacegray.vim'
 " endif
 Plug 'tpope/vim-capslock'
 Plug 'nelstrom/vim-qargs', {'on' : 'Qargs'}
-Plug 'w0ng/vim-hybrid'
 Plug 'jiangmiao/auto-pairs'
 if v:version >= 704
     Plug 'ludovicchabant/vim-gutentags'
@@ -235,7 +244,17 @@ Plug 'Shougo/neoyank.vim'
 " Plug 'kien/ctrlp.vim'
 " Plug 'LaTeX-Box-Team/LaTeX-Box'
 " Plug 'vim-scripts/AutoComplPop'
-Plug 'ap/vim-buftabline'
+" Do I really need the buffer-tab line?
+" Plug 'ap/vim-buftabline'
+
+" Colorscheme plugins
+Plug 'flazz/vim-colorschemes'
+Plug 'altercation/vim-colors-solarized'
+Plug 'sickill/vim-monokai'
+Plug 'jonathanfilip/vim-lucius'
+Plug 'chriskempson/base16-vim'
+Plug 'ajh17/Spacegray.vim'
+Plug 'w0ng/vim-hybrid'
 
 call plug#end()
 
@@ -300,7 +319,13 @@ augroup HostnameAtStartup
 augroup END
 
 function! GetHostname()
-    return g:my_hostname[:-2]
+    let l:hostname = ''
+    try
+        let l:hostname = g:my_hostname[:-2]
+    catch
+        let l:hostname = 'notfound'
+    endtry
+    return l:hostname
 endfunction
 
 " function! AirlineInit()
@@ -490,44 +515,6 @@ let g:buftabline_indicators = 1
 let g:buftabline_separators = 1
 let g:buftabline_plug_max = 0
 
-" Trying out lightline
-" set showtabline=2
-" let g:lightline = {
-" \    'colorscheme' : 'base16_default',
-" \    'active' : {
-" \       'left' : [ [ 'mode', 'paste' ],
-" \                  [ 'fugitive', 'readonly', 'hostname', 'filename', 'modified' ] ]
-" \    },
-" \    'inactive' : {
-" \       'left' : [ ['bufferinfo'] ],
-" \    },
-" \   'tab': {
-" \     'active': ['tabnum'],
-" \     'inactive': ['tabnum']
-" \   },
-" \   'tabline' : {
-" \       'left' : [ [ 'bufferline' ] ],
-" \    },
-" \    'tabline_separator' : {
-" \       'left' : '', 'right' : '',
-" \    },
-" \    'component' : {
-" \       'fugitive' : '%{exists("*fugitive#head")?fugitive#head():""}',
-" \       'bufferline' : '%{bufferline#refresh_status()}%{g:bufferline_status_info.before}%#TabLineSel#%{g:bufferline_status_info.current}%#LightLineLeft_active_3#%{g:bufferline_status_info.after}'
-" \    },
-" \    'component_function' : {
-" \       'hostname' : 'GetHostname'
-" \    },
-" \    'component_visible_condition' : {
-" \       'fugitive' : '(exists("*fugitive#head") && ""!=fugitive#head())',
-" \       'bufferline' : '1'
-" \    }
-" \}
-" let g:lightline.enable = {
-" \   'statusline': 1,
-" \   'tabline': 1
-" \}
-
 """" MAPPINGS
 
 " Copy Paste from system clipboard
@@ -625,7 +612,7 @@ vnoremap <silent> # :<C-U>
   \escape(@", '?\.*$^~['), '\_s\+', '\\_s\\+', 'g')<CR><CR>
   \gV:call setreg('"', old_reg, old_regtype)<CR>
 
-" IntelligentQuit, :Q works for closing 
+" IntelligentQuit, :Q works for closing
 " windows and buffers both
 command! -bang Q :call IntelligentQuit(<bang>0)
 
@@ -657,7 +644,7 @@ nnoremap <silent> <Leader><Space> :noh<CR>
 " Don't open manual
 nnoremap K <nop>
 
-" Don't clobber the unnamed register when pasting over text in visual mode. 
+" Don't clobber the unnamed register when pasting over text in visual mode.
 vnoremap p pgvy
 
 " Center curzor on opening all folds
@@ -665,8 +652,8 @@ nnoremap zR zRzz
 
 " Insert blank line above or below.
 " the mark prevents from losing cursor position and
-" the set paste mode temporarily turns off auto indent, so a 
-" comment character isn't entered if the mapping is triggered 
+" the set paste mode temporarily turns off auto indent, so a
+" comment character isn't entered if the mapping is triggered
 " from within a comment.
 nnoremap <silent> [<Space> :set paste<CR>m`O<Esc>``:set nopaste<CR>
 nnoremap <silent> ]<Space> :set paste<CR>m`o<Esc>``:set nopaste<CR>
@@ -740,6 +727,13 @@ augroup END
 augroup python_autopep8
     autocmd!
     au FileType python setlocal formatprg=autopep8\ --indent-size\ 0\ -
+augroup END
+
+" :make for PlantUML files. Generates a .png file in the same location
+" as the PlantUML file
+augroup plantuml_make
+    autocmd!
+    au BufNewFile,BufRead *.plantuml setlocal makeprg=java\ -jar\ ~/bin/plantuml.jar\ %
 augroup END
 
 """" FUNCTIONS
@@ -848,6 +842,7 @@ function! Ack(args)
     copen
 endfunction
 
+command! -nargs=* -complete=file Ag call Ack(<q-args>)
 command! -nargs=* -complete=file Ack call Ack(<q-args>)
 
 function! JumpOnePage(forward)

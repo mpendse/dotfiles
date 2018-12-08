@@ -3,6 +3,7 @@ alias cdrepo='cd /sandbox/mihir.pendse/repos'
 alias cd2='cd ../..'
 alias cd3='cd ../../..'
 alias lsd='ls -d */'
+# force tmux to assume that the terminal supports 256 colours
 alias tmux='tmux -2'
 alias :q=quit_vim_style
 alias ack='ack-grep'
@@ -19,15 +20,14 @@ alias die=try_die_try_again
 alias lock='gnome-screensaver-command -l'
 alias puptime='ps -o pid,comm,lstart,etime,time,args --pid'
 alias open='xdg-open'
-alias ssh='ssh -X'
+alias ssh='TERM=xterm ssh -X'
+alias less='less -n +F '
 # TMUX only supports TERM=screen or TERM=screen-256color
 [ -n "$TMUX" ] && export TERM=screen-256color
 
 g() { git $@; }
 
 t() { tig $@; }
-
-cd() { builtin cd $@ && ls -a -1; }
 
 git-remote-merged ()
 {
@@ -39,7 +39,7 @@ git-remote-not-merged ()
     for branch in `git branch -r --no-merged | grep -v HEAD`; do echo -e `git show --format="%ci %cr %an" $branch | head -n 1` \\t$branch; done | sort -r
 }
 
-git-both-merged () 
+git-both-merged ()
 {
     for branch in `comm -12  <(git branch --merged|awk '{print($1)}' | sort) <(git branch -r --merged|awk '{print($1)}'|awk -F \/ '{print($2)}' | sort)`;do echo -e `git show --format="%ci %cr %an" $branch | head -n 1` \\t$branch; done | sort -r
 }
@@ -47,6 +47,21 @@ git-both-merged ()
 git-both-not-merged ()
 {
     for branch in `comm -12  <(git branch --no-merged|awk '{print($1)}' | sort) <(git branch -r --no-merged|awk '{print($1)}'|awk -F \/ '{print($2)}' | sort)`; do echo -e `git show --format="%ci %cr %an" $branch | head -n 1` \\t$branch; done | sort -r
+}
+
+# fuzzy browse chrome history (needs fzf, google-chrome, sqlite3 installed)
+chs() {
+  local cols sep
+  cols=$(( COLUMNS / 3 ))
+  sep='{::}'
+
+  cp -f ~/.config/google-chrome/Default/History /tmp/h
+
+  sqlite3 -separator $sep /tmp/h \
+    "select substr(title, 1, $cols), url
+     from urls order by last_visit_time desc" |
+  awk -F $sep '{printf "%-'$cols's  \x1b[36m%s\x1b[m\n", $1, $2}' |
+  fzf --ansi --multi | sed 's#.*\(https*://\)#\1#' | xargs --no-run-if-empty google-chrome
 }
 
 # vi mode

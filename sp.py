@@ -46,8 +46,8 @@ def get_metadata():
                 print(m.group(1).replace(";", " "))
 
 def main():
+    get_metadata()
     try:
-        get_metadata()
         while True:
             print(eval(read()))
     except (EOFError, KeyboardInterrupt):

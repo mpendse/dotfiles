@@ -10,7 +10,7 @@
 	tool = vimdiff
 [core]
 	editor = vim
-	pager = less -+$LESS -FRS
+	pager = less -+$LESS -RS
 [color]
 	ui = auto
 [include]

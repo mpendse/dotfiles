@@ -77,10 +77,13 @@ URxvt.matcher.button: 1
 !URxvt.font: xft:Ubuntu Mono derivative Powerline Plus Nerd File Types Mono:size=12:antialias=true
 !URxvt.font: xft:Ubuntu Mono:size=12:antialias=true
 !URxvt.font: xft:UbuntuMonoDerivativePowerline Nerd Font:size=12:antialias=true
-URxvt.font: xft:Input:size=11:antialias=true
+! Some glyphs don't work with even pixelsizes (16) on Fantasque Sans Mono
+! But decimal pixelsizes work, apparently
+URxvt.font: xft:Fantasque Sans Mono:pixelsize=15.5
+!URxvt.font: xft:Input:pixelsize=14:antialias=true
 !URxvt.font: xft:DejaVu Sans Mono:size=10:antialias=true
-!URxvt.font: xft:Fira Mono for Powerline:pixelsize=14:antialias=true
-!URxvt.font: xft:Fira Mono Medium for Powerline:pixelsize=14:antialias=true
+!URxvt.font: xft:Fira Mono for Powerline:pixelsize=15:antialias=true
+!URxvt.font: xft:Fira Mono Medium for Powerline:pixelsize=15:antialias=true
 !URxvt.font: xft:CMU Typewriter Text:size=13:antialias=true
 !URxvt.font: xft:Hack:pixelsize=15:antialias=true
 !URxvt.font: xft:Hack:size=10:antialias=true
