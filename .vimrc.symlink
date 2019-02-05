@@ -109,11 +109,15 @@ endif
 """" STATUSLINE
 
 function! GetBranch()
-    let l:br = fugitive#head(8)
-    if l:br ==# ''
-        return ''
+    if exists('g:loaded_fugitive')
+        let l:br = fugitive#head(8)
+        if l:br ==# ''
+            return ''
+        else
+            return '[' . l:br . ']'
+        endif
     else
-        return '[' . l:br . ']'
+        return ''
     endif
 endfunction
 
@@ -122,6 +126,14 @@ endfunction
 function! HasBOM()
     if &bomb
         return '[BOM DETECTED]'
+    else
+        return ''
+    endif
+endfunction
+
+function! HasPaste()
+    if &paste
+        return '[PASTE]'
     else
         return ''
     endif
@@ -136,8 +148,9 @@ set statusline+=[%-0.40f]
 set statusline+=%m%h%w%q%r\ 
 " Right side
 set statusline+=%=
-set statusline+=%#LineNr#
-set statusline+=%y
+set statusline+=%#LineNr# " Use LineNr highlight group
+set statusline+=%{HasPaste()}
+set statusline+=%y " Filetype
 " set statusline+=[%{(&fenc!=''?&fenc:&enc)}]
 set statusline+=[%p%%]
 " set statusline+=[%l\/%L\]
@@ -178,17 +191,25 @@ endfunction
 call plug#begin('~/.vim/bundle')
 
 " Bundles
-if v:version >= 714
-    " Plug 'Valloric/YouCompleteMe', { 'commit' : '66dcc9581c7d237f4d839389bee055df6788fbc9', 'do' : './install.sh --clang-completer' , 'for' : ['cpp', 'python'] }
-    Plug 'Valloric/YouCompleteMe', { 'do' : './install.sh --clang-completer' , 'for' : ['cpp', 'python'] }
-    autocmd! User YouCompleteMe if !has('vim_starting') | call youcompleteme#Enable() | endif
-else
-    " basic textual tab-completion
-    Plug 'ajh17/VimCompletesMe'
-endif
+" if has("nvim")
+"     Plug 'prabirshrestha/async.vim' " Async is required for vim-lsp
+"     Plug 'prabirshrestha/vim-lsp'
+"     Plug 'prabirshrestha/asyncomplete.vim'
+"     Plug 'prabirshrestha/asyncomplete-lsp.vim'
+" else
+    if v:version >= 714
+        " Plug 'Valloric/YouCompleteMe', { 'commit' : '66dcc9581c7d237f4d839389bee055df6788fbc9', 'do' : './install.sh --clang-completer' , 'for' : ['cpp', 'python'] }
+        Plug 'Valloric/YouCompleteMe', { 'do' : './install.sh --clang-completer' , 'for' : ['cpp', 'python'] }
+        autocmd! User YouCompleteMe if !has('vim_starting') | call youcompleteme#Enable() | endif
+    else
+        " basic textual tab-completion
+        Plug 'ajh17/VimCompletesMe'
+    endif
+" endif
 Plug 'tpope/vim-commentary'
 " Plug 'bling/vim-airline'
 Plug 'vim-scripts/pythoncomplete', { 'for' : 'python' }
+" Disabling temporarily as a test for vim-asyncomplete-lsp
 Plug 'ervandew/supertab'
 " Plug 'scrooloose/nerdtree'
 Plug 'tpope/vim-fugitive'
@@ -196,7 +217,8 @@ Plug 'justinmk/vim-sneak'
 Plug 'wellle/targets.vim'
 Plug 'Shougo/unite.vim'
 Plug 'Shougo/vimproc.vim', { 'do' : function('BuildVimProc') }
-Plug 'Shougo/neomru.vim'
+" Disabling MRU because it shows up too heavy in a profile
+" Plug 'Shougo/neomru.vim'
 " Plug 'terryma/vim-smooth-scroll'
 Plug 'tpope/tpope-vim-abolish'
 Plug 'octol/vim-cpp-enhanced-highlight', { 'for' : 'cpp' }
@@ -346,7 +368,7 @@ let g:unite_source_history_yank_enable = 1
 nnoremap <Leader>f :<C-u>Unite -start-insert -buffer-name=files file directory file_rec/async:!<CR>
 
 " MRU search
-nnoremap <Leader>r :<C-u>Unite -start-insert -buffer-name=mru file_mru<CR>
+" nnoremap <Leader>r :<C-u>Unite -start-insert -buffer-name=mru file_mru<CR>
 
 " Buffer list
 nnoremap <Leader>b :<C-u>Unite -start-insert -buffer-name=buffers buffer<CR>
@@ -374,7 +396,7 @@ nnoremap <Leader>l :<C-u>Unite -start-insert -buffer-name=line line<CR>
 nnoremap q/ :<C-u>Unite -start-insert -buffer-name=search_history search_history<CR>
 
 " Set up some custom ignores
-call unite#custom_source('file_rec,file_rec/async,file_mru,file,buffer,grep',
+call unite#custom_source('file_rec,file_rec/async,file,buffer,grep',
       \ 'ignore_pattern', join([
       \ '\.git/',
       \ 'tmp/',
@@ -413,6 +435,7 @@ else
 endif
 
 " Gundo
+let g:gundo_prefer_python3 = 1
 nnoremap <Leader>u :GundoToggle<CR>
 
 " Hijacking f and t to call sneak
@@ -504,7 +527,7 @@ let g:gutentags_generate_on_missing = 0     " Don't generate tags if none exist
 " Some abolish abbreviations
 if exists(":Abolish")
     Abolish icnlud{e,ing} includ{}
-    Abolish isnt{ant,ance,antiate} inst{}
+    Abolish isnt{ant,ance,antiate,rument} inst{}
     Abolish u{8,16,32,64} uint{}_t
     Abolish i{8,16,32,64} int{}_t
 endif
@@ -514,6 +537,26 @@ let g:buftabline_numbers = 1
 let g:buftabline_indicators = 1
 let g:buftabline_separators = 1
 let g:buftabline_plug_max = 0
+
+" if has("nvim")
+"     " Vim-LSP settings
+"     if executable('cquery')
+"         au User lsp_setup call lsp#register_server({
+"                     \ 'name': 'cquery',
+"                     \ 'cmd': {server_info->['cquery']},
+"                     \ 'root_uri': {server_info->lsp#utils#path_to_uri(lsp#utils#find_nearest_parent_file_directory(lsp#utils#get_buffer_path(), 'compile_commands.json'))},
+"                     \ 'initialization_options': { 'cacheDirectory': '/sandbox/mihir.pendse/cquery-cache/' },
+"                     \ 'whitelist': ['c', 'cpp', 'objc', 'objcpp', 'cc', 'h'],
+"                     \ })
+"     endif
+"     let g:lsp_log_verbose = 1
+"     let g:lsp_log_file = expand('/tmp/vim-lsp.log')
+"     " asyncomplete settings
+"     imap <c-space> <Plug>(asyncomplete_force_refresh)
+"     let g:asyncomplete_smart_completion = 1
+"     let g:asyncomplete_auto_popup = 1
+"     autocmd! CompleteDone * if pumvisible() == 0 | pclose | endif
+" endif
 
 """" MAPPINGS
 
@@ -674,7 +717,11 @@ cnoremap %% <C-R>=fnameescape(expand('%:p:h')).'/'<CR>
 " inoremap <C-e> <Esc>A
 
 " Clang Format integration
-map <F3> :py3f ~/Downloads/clang-format.py<CR>
+" map <F3> :py3f ~/Downloads/clang-format.py<CR>
+
+" CLion formatter integration (only works if another CLion process is not
+" running)
+nnoremap <F3> :call FormatWithCLion()<CR>
 
 " :p will close current buffer, and bring previous buffer to current
 " window, without closing any window.
@@ -737,6 +784,18 @@ augroup plantuml_make
 augroup END
 
 """" FUNCTIONS
+
+function! FormatWithCLion()
+    let toplevelpath = FindTopLevelProjectDir()
+    let formatterfile = toplevelpath . 'AkunaCodeFormatting.xml'
+    let currentfile = expand('%:p')
+    let cmd = '/sandbox/mihir.pendse/builds/clion-2018.3.4/bin/format.sh -s ' . formatterfile . ' ' . currentfile
+    if has("nvim")
+        :belowright new | call termopen(cmd) | startinsert
+    else
+        :execute '!' cmd
+    endif
+endfunction
 
 function! IntelligentQuit(ignore_changes)
     " Closes the window if more than one window, deletes a buffer if
