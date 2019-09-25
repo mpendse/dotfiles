@@ -55,8 +55,22 @@ end
 -- Themes define colours, icons, and wallpapers
 beautiful.init(awful.util.getdir("config") .. "/themes/default/theme.lua")
 
+function get_hostname()
+    local f = io.popen ("/bin/hostname")
+    local hostname = f:read("*a") or ""
+    f:close()
+    hostname =string.gsub(hostname, "\n$", "")
+    return hostname
+end
+function get_terminal()
+    local t = "urxvt"
+    if get_hostname() ~= "cof-dev-l026" then
+        t = "terminator"
+    end
+    return t
+end
 -- This is used later as the default terminal and editor to run.
-terminal = "urxvt"
+terminal = get_terminal()
 editor = os.getenv("EDITOR") or "vim"
 editor_cmd = terminal .. " -e " .. editor
 

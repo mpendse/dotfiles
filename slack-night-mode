@@ -1,4 +1,5 @@
 // Add the following at the end of ssb-interop.js with the path to the black.css file.
+// Last known path is /usr/lib/slack/resources/app.asar.unpacked/src/static/ssb-interop.js
 
 document.addEventListener('DOMContentLoaded', function() {
   var fs = require('fs'),

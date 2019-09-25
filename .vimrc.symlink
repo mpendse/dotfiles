@@ -71,6 +71,9 @@ set lazyredraw
 " Space leader
 let mapleader="\<Space>"
 
+" Support the utf-8 characters in showbreak and listchars
+set encoding=utf-8
+
 " Cscope
 if has('cscope')
     set cscopeverbose
@@ -197,11 +200,11 @@ call plug#begin('~/.vim/bundle')
 "     Plug 'prabirshrestha/asyncomplete.vim'
 "     Plug 'prabirshrestha/asyncomplete-lsp.vim'
 " else
-    if v:version >= 714
-        " Plug 'Valloric/YouCompleteMe', { 'commit' : '66dcc9581c7d237f4d839389bee055df6788fbc9', 'do' : './install.sh --clang-completer' , 'for' : ['cpp', 'python'] }
-        Plug 'Valloric/YouCompleteMe', { 'do' : './install.sh --clang-completer' , 'for' : ['cpp', 'python'] }
-        autocmd! User YouCompleteMe if !has('vim_starting') | call youcompleteme#Enable() | endif
-    else
+     if has("nvim") || v:version >= 714
+         " Plug 'Valloric/YouCompleteMe', { 'commit' : '66dcc9581c7d237f4d839389bee055df6788fbc9', 'do' : './install.sh --clang-completer' , 'for' : ['cpp', 'python'] }
+         Plug 'Valloric/YouCompleteMe', { 'do' : './install.sh --clang-completer' , 'for' : ['cpp', 'python'] }
+         autocmd! User YouCompleteMe if !has('vim_starting') | call youcompleteme#Enable() | endif
+     else
         " basic textual tab-completion
         Plug 'ajh17/VimCompletesMe'
     endif
@@ -993,9 +996,9 @@ endif
 
 inoremap <C-U> <C-G>u<C-U>
 
-if &encoding ==# 'latin1' && has('gui_running')
-    set encoding=utf-8
-endif
+" if &encoding ==# 'latin1' && has('gui_running')
+"     set encoding=utf-8
+" endif
 
 if !&scrolloff
     set scrolloff=1
