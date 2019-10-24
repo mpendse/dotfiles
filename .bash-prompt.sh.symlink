@@ -67,6 +67,13 @@ __jobs_count()
     fi
 }
 
+__check_last_cmd()
+{
+    if [ $? -ne 0 ]; then
+        printf "(!) "
+    fi
+}
+
 __hostname()
 {
     if [ $HOSTNAME != "cof-dev-l026" ]; then
@@ -99,7 +106,7 @@ __ahead_behind_indicator()
 BASE16_SHELL="$HOME/.config/base16-shell/scripts/base16-default-dark.sh"
 [[ -s $BASE16_SHELL ]] && source $BASE16_SHELL
 
-export PS1='\[${RED}\]$(__jobs_count)\[${NORMAL}\]\
+export PS1='\[${BOLD}\]\[${RED}\]$(__check_last_cmd)\[${NORMAL}\]\[${RED}\]$(__jobs_count)\[${NORMAL}\]\
 \[${BLUE}\]$(__hostname)\[${NORMAL}\]\
 $(
 if [ $(__git_ps1)x != "x" ]; then
