@@ -107,3 +107,32 @@ set_window_title()
 {
     echo -ne "\e]2;$*\a"
 }
+
+# Forces ccache and compile commands json generation
+mycmake ()
+{
+    cmake -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_EXPORT_COMPILE_COMMANDS=1 "$@"
+}
+
+cmakeninja ()
+{
+    local compile_jobs=$1
+    shift # Moves all positional arguments one spot up, effectively "popping" $1 from the list
+    cmake -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DNINJA_COMPILE_JOBS=$compile_jobs -DNINJA_LINK_JOBS=5 -GNinja "$@"
+}
+
+# Forces ccache to use distcc, and also expects a CGroup called "memory:build" which has
+# restricted memory. The CGroup can be created as such:
+# cgcreate -a <user> -t <user> -g memory:build
+# cgset -r memory.limit_in_bytes=20g build
+# by replacing "<user>" with the current user doing the make, and 20g by the amount of memory
+# you want the build job restricted to.
+mymake ()
+{
+    CCACHE_PREFIX_CPP=distcc CCACHE_PREFIX=distcc cgexec -g memory:build make -j1000 "$@"
+}
+
+myninja ()
+{
+    CCACHE_PREFIX_CPP=distcc CCACHE_PREFIX=distcc cgexec -g memory:build ninja -j1000 "$@"
+}

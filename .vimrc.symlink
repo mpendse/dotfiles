@@ -194,12 +194,14 @@ endfunction
 call plug#begin('~/.vim/bundle')
 
 " Bundles
-" if has("nvim")
+if has("nvim")
 "     Plug 'prabirshrestha/async.vim' " Async is required for vim-lsp
 "     Plug 'prabirshrestha/vim-lsp'
 "     Plug 'prabirshrestha/asyncomplete.vim'
 "     Plug 'prabirshrestha/asyncomplete-lsp.vim'
-" else
+    Plug 'neoclide/coc.nvim', {'branch': 'release'}
+    Plug 'jackguo380/vim-lsp-cxx-highlight'
+else
      if has("nvim") || v:version >= 714
          " Plug 'Valloric/YouCompleteMe', { 'commit' : '66dcc9581c7d237f4d839389bee055df6788fbc9', 'do' : './install.sh --clang-completer' , 'for' : ['cpp', 'python'] }
          Plug 'Valloric/YouCompleteMe', { 'do' : './install.sh --clang-completer' , 'for' : ['cpp', 'python'] }
@@ -208,12 +210,11 @@ call plug#begin('~/.vim/bundle')
         " basic textual tab-completion
         Plug 'ajh17/VimCompletesMe'
     endif
-" endif
+endif
 Plug 'tpope/vim-commentary'
-" Plug 'bling/vim-airline'
 Plug 'vim-scripts/pythoncomplete', { 'for' : 'python' }
 " Disabling temporarily as a test for vim-asyncomplete-lsp
-Plug 'ervandew/supertab'
+" Plug 'ervandew/supertab'
 " Plug 'scrooloose/nerdtree'
 Plug 'tpope/vim-fugitive'
 Plug 'justinmk/vim-sneak'
@@ -222,9 +223,13 @@ Plug 'Shougo/unite.vim'
 Plug 'Shougo/vimproc.vim', { 'do' : function('BuildVimProc') }
 " Disabling MRU because it shows up too heavy in a profile
 " Plug 'Shougo/neomru.vim'
-" Plug 'terryma/vim-smooth-scroll'
 Plug 'tpope/tpope-vim-abolish'
-Plug 'octol/vim-cpp-enhanced-highlight', { 'for' : 'cpp' }
+if has("nvim")
+    " Assuming we have COC + VIM LSP CXX highlighting above, we don't need
+    " another hightlight source.
+else
+    Plug 'octol/vim-cpp-enhanced-highlight', { 'for' : 'cpp' }
+endif
 Plug 'tpope/vim-surround'
 Plug 'tsukkee/unite-tag'
 Plug 'Shougo/unite-outline'
@@ -262,8 +267,6 @@ Plug 'junegunn/vim-easy-align', {'on' : 'EasyAlign'}
 Plug 'tpope/vim-rsi'
 " Yank history source for unite has been separated from unite
 Plug 'Shougo/neoyank.vim'
-" Airline Themes have migrated to separate repo
-" Plug 'vim-airline/vim-airline-themes'
 " Plug 'bling/vim-bufferline'
 " Plug 'ivanov/vim-ipython', {'for' : 'python'}
 " Plug 'kien/ctrlp.vim'
@@ -280,6 +283,7 @@ Plug 'jonathanfilip/vim-lucius'
 Plug 'chriskempson/base16-vim'
 Plug 'ajh17/Spacegray.vim'
 Plug 'w0ng/vim-hybrid'
+" Plug 'dstein64/vim-startuptime'
 
 call plug#end()
 
@@ -303,37 +307,8 @@ augroup END
 " Supertab settings
 let g:SuperTabDefaultCompletionType = "<c-n>"
 
-" Fed up of problems with smoothscroll
-" disable smoothscroll in diff mode (it is slow as it is)
-" if !&diff
-"     " smoothscroll mappings
-"     nnoremap <silent> <c-u> :call smooth_scroll#up(&scroll, 5, 2)<CR>
-"     nnoremap <silent> <c-d> :call smooth_scroll#down(&scroll, 5, 2)<CR>
-"     nnoremap <silent> <c-b> :call smooth_scroll#up(&scroll*2, 5, 4)<CR>
-"     nnoremap <silent> <c-f> :call smooth_scroll#down(&scroll*2, 5, 4)<CR>
-" endif
-
 " Override for latex filetype. (used with LaTex-Box plugin)
 " let g:tex_flavor='latex'
-
-" Airline settings
-" let g:airline_theme='dark'
-
-" Trying out a smaller set of extensions
-" let g:airline_extensions = ['branch', 'tabline', 'whitespace', 'capslock']
-
-" Ignore trailing whitespaces, but look out for mixed indents
-" let g:airline#extensions#whitespace#checks = [ 'indent' ]
-
-" Removing separators
-" let g:airline_left_sep=''
-" let g:airline_right_sep=''
-
-" Enable the list of buffers
-" let g:airline#extensions#tabline#enabled = 1
-
-" Show buffer numbers
-" let g:airline#extensions#tabline#buffer_nr_show = 1
 
 " Put hostname before filename
 " Autocmd to store it at startup cuz the status line is rendered every time
@@ -353,13 +328,6 @@ function! GetHostname()
     return l:hostname
 endfunction
 
-" function! AirlineInit()
-"     call airline#parts#define_function('hostname', 'GetHostname')
-"     call airline#parts#define_minwidth('hostname', 80)      " show hostname only if width >= 80
-"     let g:airline_section_c = airline#section#create(['hostname', 'file'])
-" endfunction
-" au VimEnter * call AirlineInit()
-
 " Unite settings
 " Use fuzzy matcher for everything
 call unite#filters#matcher_default#use(['matcher_fuzzy'])
@@ -368,16 +336,13 @@ call unite#filters#matcher_default#use(['matcher_fuzzy'])
 let g:unite_source_history_yank_enable = 1
 
 " File search
-nnoremap <Leader>f :<C-u>Unite -start-insert -buffer-name=files file directory file_rec/async:!<CR>
+" nnoremap <Leader>f :<C-u>Unite -start-insert -buffer-name=files file directory file_rec/async:!<CR>
 
 " MRU search
 " nnoremap <Leader>r :<C-u>Unite -start-insert -buffer-name=mru file_mru<CR>
 
 " Buffer list
 nnoremap <Leader>b :<C-u>Unite -start-insert -buffer-name=buffers buffer<CR>
-
-" Grep from cwd
-nnoremap <Leader>g :<C-u>Unite -no-quit -winheight=10 -buffer-name=grep grep:.<CR>
 
 " Yank history
 nnoremap <Leader>h :<C-u>Unite -buffer-name=yanks history/yank<CR>
@@ -389,8 +354,8 @@ nnoremap <Leader>t :<C-u>Unite -start-insert -buffer-name=tags tag<CR>
 nnoremap <Leader>o :<C-u>Unite -winwidth=40 -buffer-name=outline -vertical outline<CR>
 
 " Search for text in all open buffers
-nnoremap <Leader>s :<C-u>Unite -start-insert -custom-grep-search-word-highlight=Normal 
-            \-buffer-name=buffer-search grep:$buffers::.<CR>
+" nnoremap <Leader>s :<C-u>Unite -start-insert -custom-grep-search-word-highlight=Normal 
+            " \-buffer-name=buffer-search grep:$buffers::.<CR>
 
 " Search for text in current buffer
 nnoremap <Leader>l :<C-u>Unite -start-insert -buffer-name=line line<CR>
@@ -560,6 +525,25 @@ let g:buftabline_plug_max = 0
 "     let g:asyncomplete_auto_popup = 1
 "     autocmd! CompleteDone * if pumvisible() == 0 | pclose | endif
 " endif
+
+if has("nvim")
+    " COC settings
+
+    " Use :CocStart to start
+    let g:coc_start_at_startup = 0
+
+    inoremap <silent><expr> <TAB>
+          \ pumvisible() ? "\<C-n>" :
+          \ <SID>check_back_space() ? "\<TAB>" :
+          \ coc#refresh()
+    inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+
+    function! s:check_back_space() abort
+        let col = col('.') - 1
+        return !col || getline('.')[col - 1]  =~# '\s'
+    endfunction
+endif
+
 
 """" MAPPINGS
 
@@ -952,9 +936,7 @@ set bg=dark
 " Use Tomorrow-Night-Bright on any other terminal
 let base16colorspace=256
 colo base16-default-dark
-" let g:airline_theme='base16'
 " colo Tomorrow-Night-Bright
-" let g:airline_theme='tomorrow'
 " let g:zenburn_high_Contrast = 1
 " colo zenburn
 " colo wombat256
@@ -1028,6 +1010,4 @@ if has('gui_running')
     set guioptions-=b
     colo base16-default-dark
     set showtabline=0
-    " let g:airline_theme='base16'
 endif
-

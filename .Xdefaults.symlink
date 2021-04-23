@@ -80,6 +80,7 @@ URxvt.matcher.button: 1
 ! Some glyphs don't work with even pixelsizes (16) on Fantasque Sans Mono
 ! But decimal pixelsizes work, apparently
 URxvt.font: xft:Fantasque Sans Mono:pixelsize=15.5
+! URxvt.font: xft:JetBrainsMono:pixelsize=13.5:antialias=true
 !URxvt.font: xft:Input:pixelsize=14:antialias=true
 !URxvt.font: xft:DejaVu Sans Mono:size=10:antialias=true
 !URxvt.font: xft:Fira Mono for Powerline:pixelsize=15:antialias=true
