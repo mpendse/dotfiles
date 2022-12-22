@@ -195,17 +195,18 @@ call plug#begin('~/.vim/bundle')
 
 " Bundles
 if has("nvim")
-"     Plug 'prabirshrestha/async.vim' " Async is required for vim-lsp
-"     Plug 'prabirshrestha/vim-lsp'
-"     Plug 'prabirshrestha/asyncomplete.vim'
-"     Plug 'prabirshrestha/asyncomplete-lsp.vim'
-    Plug 'neoclide/coc.nvim', {'branch': 'release'}
+    " Plug 'neoclide/coc.nvim', {'branch': 'release'}
     Plug 'jackguo380/vim-lsp-cxx-highlight'
+    Plug 'neovim/nvim-lspconfig'
+    Plug 'hrsh7th/nvim-cmp' " Autocompletion plugin
+    Plug 'hrsh7th/cmp-nvim-lsp' "  LSP source for nvim-cmp
+    " Plug 'p00f/clangd_extensions.nvim'
 else
-     if has("nvim") || v:version >= 714
+     Plug 'ajh17/VimCompletesMe'
+     if v:version >= 714
          " Plug 'Valloric/YouCompleteMe', { 'commit' : '66dcc9581c7d237f4d839389bee055df6788fbc9', 'do' : './install.sh --clang-completer' , 'for' : ['cpp', 'python'] }
-         Plug 'Valloric/YouCompleteMe', { 'do' : './install.sh --clang-completer' , 'for' : ['cpp', 'python'] }
-         autocmd! User YouCompleteMe if !has('vim_starting') | call youcompleteme#Enable() | endif
+         " Plug 'Valloric/YouCompleteMe', { 'do' : './install.sh --clang-completer' , 'for' : ['cpp', 'python'] }
+         " autocmd! User YouCompleteMe if !has('vim_starting') | call youcompleteme#Enable() | endif
      else
         " basic textual tab-completion
         Plug 'ajh17/VimCompletesMe'
@@ -335,20 +336,27 @@ call unite#filters#matcher_default#use(['matcher_fuzzy'])
 " Yank history enable
 let g:unite_source_history_yank_enable = 1
 
+""" Trying some FZF alternatives for unite
+" Empty value to disable FZF preview window
+let g:fzf_preview_window = []
+
 " File search
 " nnoremap <Leader>f :<C-u>Unite -start-insert -buffer-name=files file directory file_rec/async:!<CR>
+nnoremap <Leader>f :Files<CR>
 
-" MRU search
-" nnoremap <Leader>r :<C-u>Unite -start-insert -buffer-name=mru file_mru<CR>
+" Git Files search
+nnoremap <Leader>g :GFiles<CR>
 
 " Buffer list
-nnoremap <Leader>b :<C-u>Unite -start-insert -buffer-name=buffers buffer<CR>
+" nnoremap <Leader>b :<C-u>Unite -start-insert -buffer-name=buffers buffer<CR>
+nnoremap <Leader>b :Buffers<CR>
 
 " Yank history
 nnoremap <Leader>h :<C-u>Unite -buffer-name=yanks history/yank<CR>
 
 " Tags
-nnoremap <Leader>t :<C-u>Unite -start-insert -buffer-name=tags tag<CR>
+" nnoremap <Leader>t :<C-u>Unite -start-insert -buffer-name=tags tag<CR>
+nnoremap <Leader>t :Tags<CR>
 
 " Outline
 nnoremap <Leader>o :<C-u>Unite -winwidth=40 -buffer-name=outline -vertical outline<CR>
@@ -358,7 +366,8 @@ nnoremap <Leader>o :<C-u>Unite -winwidth=40 -buffer-name=outline -vertical outli
             " \-buffer-name=buffer-search grep:$buffers::.<CR>
 
 " Search for text in current buffer
-nnoremap <Leader>l :<C-u>Unite -start-insert -buffer-name=line line<CR>
+" nnoremap <Leader>l :<C-u>Unite -start-insert -buffer-name=line line<CR>
+nnoremap <Leader>l :BLines<CR>
 
 " Search history
 nnoremap q/ :<C-u>Unite -start-insert -buffer-name=search_history search_history<CR>
@@ -390,16 +399,20 @@ function! s:unite_settings()
     imap <buffer> <C-k>   <Plug>(unite_select_previous_line)
 endfunction
 
-if v:version >= 704 
-    " YouCompleteMe settings
-    let g:ycm_confirm_extra_conf = 0
-    let g:ycm_autoclose_preview_window_after_completion = 1
-    " Turning this off because I got bored of the lag 
-    let g:ycm_show_diagnostics_ui = 0
-    " let g:ycm_enable_diagnostic_signs = 1
-    nnoremap <Leader>jd :YcmCompleter GoTo<CR>
-else
-    nnoremap <Leader>jd <nop>
+" nvim has its own completion and jump to definition setup in the nvim-lsp
+" and nvim-cmp setup.
+if !has("nvim")
+    if v:version >= 704 
+        " YouCompleteMe settings
+        let g:ycm_confirm_extra_conf = 0
+        let g:ycm_autoclose_preview_window_after_completion = 1
+        " Turning this off because I got bored of the lag 
+        let g:ycm_show_diagnostics_ui = 0
+        " let g:ycm_enable_diagnostic_signs = 1
+        nnoremap <Leader>jd :YcmCompleter GoTo<CR>
+    else
+        nnoremap <Leader>jd <nop>
+    endif
 endif
 
 " Gundo
@@ -507,43 +520,101 @@ let g:buftabline_separators = 1
 let g:buftabline_plug_max = 0
 
 " if has("nvim")
-"     " Vim-LSP settings
-"     if executable('cquery')
-"         au User lsp_setup call lsp#register_server({
-"                     \ 'name': 'cquery',
-"                     \ 'cmd': {server_info->['cquery']},
-"                     \ 'root_uri': {server_info->lsp#utils#path_to_uri(lsp#utils#find_nearest_parent_file_directory(lsp#utils#get_buffer_path(), 'compile_commands.json'))},
-"                     \ 'initialization_options': { 'cacheDirectory': '/sandbox/mihir.pendse/cquery-cache/' },
-"                     \ 'whitelist': ['c', 'cpp', 'objc', 'objcpp', 'cc', 'h'],
-"                     \ })
-"     endif
-"     let g:lsp_log_verbose = 1
-"     let g:lsp_log_file = expand('/tmp/vim-lsp.log')
-"     " asyncomplete settings
-"     imap <c-space> <Plug>(asyncomplete_force_refresh)
-"     let g:asyncomplete_smart_completion = 1
-"     let g:asyncomplete_auto_popup = 1
-"     autocmd! CompleteDone * if pumvisible() == 0 | pclose | endif
+"     " COC settings
+"     " Use :CocStart to start
+"     let g:coc_start_at_startup = 0
+
+"     inoremap <silent><expr> <TAB>
+"           \ pumvisible() ? "\<C-n>" :
+"           \ <SID>check_back_space() ? "\<TAB>" :
+"           \ coc#refresh()
+"     inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+
+"     function! s:check_back_space() abort
+"         let col = col('.') - 1
+"         return !col || getline('.')[col - 1]  =~# '\s'
+"     endfunction
 " endif
 
 if has("nvim")
-    " COC settings
 
-    " Use :CocStart to start
-    let g:coc_start_at_startup = 0
+lua << EOF
 
-    inoremap <silent><expr> <TAB>
-          \ pumvisible() ? "\<C-n>" :
-          \ <SID>check_back_space() ? "\<TAB>" :
-          \ coc#refresh()
-    inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+-- require'lspconfig'.clangd.setup{}
+    -- local on_attach = function(client, bufnr)
+    --     -- Enable completion triggered by <c-x><c-o>
+    --     vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
+    -- end
 
-    function! s:check_back_space() abort
-        let col = col('.') - 1
-        return !col || getline('.')[col - 1]  =~# '\s'
-    endfunction
+-- completion setup
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+-- capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
+capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
+
+local my_on_attach = function(client, bufnr)
+  -- Enable completion triggered by <c-x><c-o>
+  vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
+  -- Mappings.
+  -- jump to definition mapping
+  local opts = { noremap=true, silent=true}
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>jd', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
+end
+
+-- Enable some language servers with the additional completion capabilities offered by nvim-cmp
+local servers = { 'clangd' }
+local lspconfig = require('lspconfig')
+for _, lsp in ipairs(servers) do
+  lspconfig[lsp].setup {
+    on_attach = my_on_attach,
+    capabilities = capabilities,
+    flags = {
+        -- This will be the default in neovim 0.7+
+        debounce_text_changes = 150,
+    }
+  }
+end
+
+-- testing clangd extensions with no additional configuration
+-- idk but this doesn't do much
+-- require("clangd_extensions").setup()
+
+-- nvim-cmp setup
+local cmp = require 'cmp'
+cmp.setup {
+  mapping = {
+    ['<C-p>'] = cmp.mapping.select_prev_item(),
+    ['<C-n>'] = cmp.mapping.select_next_item(),
+    -- ['<C-d>'] = cmp.mapping.scroll_docs(-4),
+    -- ['<C-f>'] = cmp.mapping.scroll_docs(4),
+    ['<C-Space>'] = cmp.mapping.complete(),
+    -- ['<C-e>'] = cmp.mapping.close(),
+    ['<CR>'] = cmp.mapping.confirm {
+      behavior = cmp.ConfirmBehavior.Replace,
+      select = true,
+    },
+    ['<Tab>'] = function(fallback)
+      if cmp.visible() then
+        cmp.select_next_item()
+      else
+        fallback()
+      end
+    end,
+    ['<S-Tab>'] = function(fallback)
+      if cmp.visible() then
+        cmp.select_prev_item()
+      else
+        fallback()
+      end
+    end,
+  },
+  sources = {
+    { name = 'nvim_lsp' },
+  },
+}
+
+EOF
+
 endif
-
 
 """" MAPPINGS
 
@@ -741,23 +812,6 @@ augroup quickfix_on_top
     au FileType qf nmap <buffer> q :q<CR>
 augroup END
 
-" Fed up of folds
-" Remembers my folds when switching between buffers. Keeps only one view
-" per file. This shouldn't be necessary, but apparently there is some plugin
-" which folds everything I had unfolded before I left a buffer (because this
-" doesn't happen with vim -u NONE) and I'm too lazy to track down 
-" which plugin is responsible.
-" TODO Figure out a way to delete the created view file
-" TODO Doesn't work always
-" augroup please_keep_my_fold_state
-"     autocmd!
-"     if !&diff
-"         set viewoptions="folds,cursor"
-"         autocmd BufWinLeave * if expand("%") != "" | mkview! | endif
-"         autocmd BufWinEnter * if expand("%") != "" | loadview | endif
-"     endif
-" augroup END
-
 augroup python_autopep8
     autocmd!
     au FileType python setlocal formatprg=autopep8\ --indent-size\ 0\ -
@@ -768,6 +822,11 @@ augroup END
 augroup plantuml_make
     autocmd!
     au BufNewFile,BufRead *.plantuml setlocal makeprg=java\ -jar\ ~/bin/plantuml.jar\ %
+augroup END
+
+augroup markdown_textwidth
+    autocmd!
+    au FileType markdown setlocal textwidth=80
 augroup END
 
 """" FUNCTIONS

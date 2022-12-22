@@ -72,14 +72,14 @@ URxvt.internalBorder: 19
 URxvt.cursorBlink: true
 URxvt.scrollBar: false
 URxvt.perl-ext-common: default,matcher
-URxvt.url-launcher: google-chrome
+URxvt.url-launcher: firefox
 URxvt.matcher.button: 1
 !URxvt.font: xft:Ubuntu Mono derivative Powerline Plus Nerd File Types Mono:size=12:antialias=true
 !URxvt.font: xft:Ubuntu Mono:size=12:antialias=true
 !URxvt.font: xft:UbuntuMonoDerivativePowerline Nerd Font:size=12:antialias=true
 ! Some glyphs don't work with even pixelsizes (16) on Fantasque Sans Mono
 ! But decimal pixelsizes work, apparently
-URxvt.font: xft:Fantasque Sans Mono:pixelsize=15.5
+URxvt.font: xft:Fantasque Sans Mono:pixelsize=35
 ! URxvt.font: xft:JetBrainsMono:pixelsize=13.5:antialias=true
 !URxvt.font: xft:Input:pixelsize=14:antialias=true
 !URxvt.font: xft:DejaVu Sans Mono:size=10:antialias=true

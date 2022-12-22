@@ -21,3 +21,12 @@ bind-key v split-window -h
 
 set -g status-bg colour235
 set -g status-fg white
+
+# Startr windows and panes at 1, not 0
+set -g base-index 1
+setw -g pane-base-index 1
+
+# When the renumber-windows setssion option is enabled, tmux will automatically
+# renumber the windows of a session (as with move-window -r) after any window
+# is closed.
+set-option -g renumber-windows on

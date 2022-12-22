@@ -21,3 +21,6 @@
 	conflictstyle = diff3
 [commit]
 	verbose = true
+[user]
+	email = mpendse90@gmail.com
+	name = Mihir Pendse
